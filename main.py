@@ -4,11 +4,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 #if placed{} 
-img = cv.imread('templates/test1.jpg',0)
+img = cv.imread('test1.jpg',0)
 img2 = img.copy()
 
 #const
-template = cv.imread('templates/a.png',0)
+template = cv.imread('templates/1.png',0)
 
 w, h = template.shape[::-1]
 # All the 6 methods for comparison in a list
