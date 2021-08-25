@@ -2,13 +2,31 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import glob
+import imutils
+import time
 
-imageToBeInspected = 'styleNum.jpeg'    #acting as camera
-# poms = [['cropped3.jpeg','cropped4.jpeg']]
-poms = [glob.glob('styleNum\\*.jpeg')]
-pomOffset =[[157,393,213,350]]
+cap = cv.VideoCapture(2, cv.CAP_DSHOW)
+
+ret, frame = cap.read()
+(grabbed, frame) = cap.read()
+showimg = frame
+cv.imshow('img1', showimg)  # display the captured image
+cv.waitKey(1)
+time.sleep(0.3) # Wait 300 miliseconds
+image = 'camtest\\imagecam.jpeg'
+cv.imwrite(image, frame)
+cap.release()
+        
+
+imageToBeInspected = 'camtest\\imagecam.jpeg'    #acting as camera
+# imageToBeInspected = 'original.jpeg'
+# poms = [['cropped3.jpeg','cropped4.jpeg']]  
+poms = [glob.glob('styleNum\\*.jpg')]
+# pomOffset =[[157,393,213,350]]
+pomOffset =[[30,100,35,90]]
 pomIndex = 0
-pixelToInch = 57.37
+pixelToInch = 16
+# pixelToInch = 39.50
 result = []
 
 for pom in poms:
@@ -52,3 +70,4 @@ for pom in poms:
     plt.suptitle(meth)
     plt.show()
     pomIndex +=1
+
