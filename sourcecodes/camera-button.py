@@ -118,7 +118,7 @@ def show_frame():
 
     _, frame = cap.read()
 
-    prevImg = Image.fromarray(cv2image)
+    prevImg = Image.fromarray(prevImg)
     imgtk = ImageTk.PhotoImage(image=prevImg)
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
