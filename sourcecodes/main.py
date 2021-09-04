@@ -79,14 +79,14 @@ def pom():
                 
             pomA = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
             pomA2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
-            print("pomA-",pomA,"pomA2-",pomA2,)
-            print(pomOffset)
+            
             resultA.append((pomA2[0]-pomA[0])/pixelToInch)
             print("pom-BelowArmhole:",round(resultA[pomIndex],3),"inches") # pom end
-  
+           
     except:
         print("Error in POM Below Armhole!")  
-                                                                                                           #Sweep-Straight
+  
+                                                                                                               #Sweep-Straight
     try :
         poms = [glob.glob('poms\\Sweep-Straight\\*.jpg')]
         # pomOffset =[[157,393,213,350]]
