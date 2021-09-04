@@ -22,7 +22,7 @@ def prompt_ok(event = 0):
    
     saveAndExit()
     pom()
-
+    resume()
 
 
 def saveAndExit(event = 0):
@@ -82,7 +82,6 @@ cap = cv2.VideoCapture(camIndex,cv2.CAP_DSHOW)
 capWidth = cap.get(3)
 capHeight = cap.get(4)
 
-
 success, frame = cap.read()
 if not success:
     if camIndex == 0:
@@ -128,4 +127,3 @@ def show_frame():
 
 show_frame()
 mainWindow.mainloop()
-
