@@ -23,10 +23,6 @@ def prompt_ok(event = 0):
     saveAndExit()
     pom()
     resume()
-<<<<<<< HEAD
-=======
-
->>>>>>> b8d393d44593f3a2089dd5eaebe3a67ed9588b41
 
 
 def saveAndExit(event = 0):
@@ -120,8 +116,9 @@ def show_frame():
     global cancel, prevImg, button
 
     _, frame = cap.read()
+    cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    prevImg = Image.fromarray(prevImg)
+    prevImg = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=prevImg)
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
