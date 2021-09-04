@@ -15,11 +15,10 @@ def prompt_ok(event = 0):
 
     button.place_forget()
    
-    # button1 = tk.Button(mainWindow, text="Good Image!", command=saveAndExit)
+   
     button2 = tk.Button(mainWindow, text="Try Again", command=resume)
-    # button1.place(anchor=tk.CENTER, relx=0.2, rely=0.9, width=150, height=50)
+   
     button2.place(anchor=tk.CENTER, relx=0.8, rely=0.9, width=150, height=50)
-    # button1.focus()
    
     saveAndExit()
     pom()
@@ -45,7 +44,7 @@ def resume(event = 0):
 
     cancel = False
 
-    # button1.place_forget()
+  
     button2.place_forget()
 
     mainWindow.bind('<Return>', prompt_ok)
@@ -119,29 +118,6 @@ def show_frame():
 
     _, frame = cap.read()
 
-    # Read logo and resize
-    logo = cv2.imread('contours.png')
-    # size = 400
-    logo = cv2.resize(logo, (640, 480))
-
-
-    cv2image = cv2.cvtColor(LOGO, cv2.COLOR_BGR2RGB)
-    ret, mask = cv2.threshold(img2gray, 1, 255, cv2.THRESH_BINARY)
-
-    while cap.isOpened():
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-        if ret:
-            # Flip the frame
-            frame = cv2.flip(frame, 1)
-
-            # Region of Image (ROI), where we want to insert logo
-            roi = frame
-
-            # Set an index of where the mask is
-            roi[np.where(mask)] = 0
-            roi += logo
-
     prevImg = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=prevImg)
     lmain.imgtk = imgtk
@@ -150,5 +126,5 @@ def show_frame():
         lmain.after(10, show_frame)
 
 show_frame()
-
 mainWindow.mainloop()
+
