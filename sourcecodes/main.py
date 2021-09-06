@@ -13,6 +13,8 @@ from numpy.lib.function_base import median
 from math import dist
 from scipy.spatial import distance
 from collections import namedtuple
+from itertools import product
+
 
 
 def pom():
@@ -218,6 +220,8 @@ def pom():
             templBA = cv.imread(pom[1],0)
             w, h = templAB.shape[::-1]
             w2, h2 = templBA.shape[::-1]
+
+
             # All the 6 methods for comparison in a list
             methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
                     'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
@@ -230,7 +234,7 @@ def pom():
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
             min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
            
-            # print(min_val, max_val, min_loc, max_loc)
+            # print(min_loc, max_loc, min_loc2, max_loc2)
             # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
             if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
                 top_left = min_loc
@@ -240,16 +244,15 @@ def pom():
                 top_left = max_loc
                 top_left2 = max_loc2
 
-            
             pomD = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
+            
             pomD2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
 
-            resultD.append((pomD2[1]-pomD[1])/pixelToInch)
+            resultD.append((pomD2[1]+pomD[1])/pixelToInch)
 
-           
            # Return True
            
-            # print("FrontLength-FromHPS:",round(resultD[pomIndex],3),"inches") # pom end
+            print("FrontLength-FromHPS:",round(resultD[pomIndex],3),"inches") # pom end
   
     except:
         print("Error in FrontLength-FromHPS!")
@@ -262,7 +265,6 @@ def pom():
     cv.line(img,pomC, pomC2, 255, 2)    #neck width seam to seam
     cv.putText(img, "->C: "+ str(round(resultC[pomIndex],3)) , (pomC), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2)
     cv.line(img,pomD, pomD2, 255, 2)    #Front length- from HPS
-    # cv.line(img, pomD,pomD2,(255, 0, 255), 2)
     cv.putText(img, "->D: "+ str(round(resultD[pomIndex],3)) , (np.add(pomD,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
 
                                                                 # Result box
