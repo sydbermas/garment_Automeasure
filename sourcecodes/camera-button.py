@@ -102,7 +102,6 @@ lmain = tk.Label(mainWindow, compound=tk.CENTER, anchor=tk.CENTER, relief=tk.RAI
 button = tk.Button(mainWindow, text="Capture", command=prompt_ok)
 
 
-
 button_changeCam = tk.Button(mainWindow, text="Switch Camera", command=changeCam)
 
 lmain.pack()
@@ -126,4 +125,5 @@ def show_frame():
         lmain.after(10, show_frame)
 
 show_frame()
+
 mainWindow.mainloop()

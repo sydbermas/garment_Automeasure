@@ -8,7 +8,7 @@ import imutils
 import time
 from fractions import Fraction
 from tkinter import *
-from numpy.core.fromnumeric import amax
+from numpy.core.fromnumeric import amax, shape
 from numpy.lib.function_base import median
 from math import dist
 from scipy.spatial import distance
@@ -220,8 +220,6 @@ def pom():
             templBA = cv.imread(pom[1],0)
             w, h = templAB.shape[::-1]
             w2, h2 = templBA.shape[::-1]
-
-
             # All the 6 methods for comparison in a list
             methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
                     'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
@@ -247,6 +245,7 @@ def pom():
             pomD = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
             
             pomD2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
+            
 
             resultD.append((pomD2[1]+pomD[1])/pixelToInch)
 
@@ -259,15 +258,13 @@ def pom():
 
     cv.line(img,pomA, pomA2, 255, 2)    #pom below armhole
     cv.putText(img, "->A: "+ str(round(resultA[pomIndex],3)) , (pomA), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2)
-    
     cv.line(img,pomB, pomB2, 255, 2)    #pom sweep straight
     cv.putText(img, "->B: "+ str(round(resultB[pomIndex],3)) , (pomB), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2)
     cv.line(img,pomC, pomC2, 255, 2)    #neck width seam to seam
     cv.putText(img, "->C: "+ str(round(resultC[pomIndex],3)) , (pomC), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2)
     cv.line(img,pomD, pomD2, 255, 2)    #Front length- from HPS
     cv.putText(img, "->D: "+ str(round(resultD[pomIndex],3)) , (np.add(pomD,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
-
-                                                                # Result box
+                                                           # Result box
     # root = Tk()
     # root.withdraw()
     # tkinter.messagebox.showinfo(title="Result", message=(
@@ -290,4 +287,4 @@ def pom():
     pomIndex +=1    #pomindex a to b
 
 
-# pom() # offset test
+pom() # offset test
