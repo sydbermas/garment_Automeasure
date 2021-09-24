@@ -15,6 +15,7 @@ from scipy.spatial import distance
 from collections import namedtuple
 from itertools import product
 
+
 imageToBeInspected = 'calresult\\imageCap.jpg'    #acting as camera
     # imageToBeInspected = 'original.jpeg'
     # poms = [['cropped3.jpeg','cropped4.jpeg']]  

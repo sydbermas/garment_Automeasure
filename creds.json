@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "automeasure",
+  "private_key_id": "d8fe09f41c1d02697f982463a2d17a9613ae84ed",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDHkuY7PdXJuNLv\nRJAzr0ObWcMJ7lbkho7Fd5XzZ/+COZuHjwjP+PrWxrK85iS0syyVB0OfCYojuwrD\ne0LyEcqk93j0qlcprSdjp5/e2qQ3PIvd3YQbMqzGN8QuoBi87BX+oQygVo9b4KtU\nr+snAAiHbowhQvhMIOogPRShEaaeIvLJGBf1T+hj8zAMbYdaX0rJqecUJR9x/UyK\n3xXrB0RoD6G0v8HpqEwi783ZEyRt90w/ZSvqskiW8l6BiS4df8yhAy+RXiH0Q+sv\nhRMA5cxY7ri+iizu4tkpDi922Yb2eS3FJuOEGmeTy2E7dk1vAeD9+ZOW3Uzmxehq\n0a60swApAgMBAAECggEAATOKrD+eilTQ/Dy663y6GPTM3kHvhveiY2DpZ6owGQ4U\nuBet02apx+IxUD7IaMgNVCZTi2EI0lc9ZNjYmdFumVieA0cFOEyBCLIJHdPOGkEE\njITZVzqSXK0YQrmW/IglR7+bblmnCkQLc/qNHVJ8Oqh5MngPO5IVJrWHasLK8He9\nqelsNHwm4KftDuqChsvpupfpe7fjhZDmsTDnVhFql9r64Ht+CTsI8z2UZ0oOZFmN\nnLk5Qc/voilTgtJyT7JDgcp5ugttOhjTGszC+X2KKgJ9AXD89k35ZA4AQJIqdva2\n5V5FIg8P/N98xTrt725m1O/nk77ILFDQp/iOh7ssyQKBgQDtbefn4j3HaTvs6RJ8\nBqra5dOXjEBcnmvSgLtPWgxSDvqs4ztm3QTNzAYXWNiaGp55OYX6R9jc6ztWDZHu\nagkYlofV+cuAYsST39xUWlWjw2gl++ZrUBkkY2N1nutdiN2nHRh10NjgDS/mRqZu\n+rFoMEtl+q/4KU28tOo7+JoPlQKBgQDXLwFjuUmzb6ZAUgirFmu9wa1g95diKpLu\ndh+KPCHHBKynS+x+639caq+KdYwv3KE0Lok5Zl/IZ0ehgKW49PTJa4HT5qRM3lx+\nKm7QAg1M5EVYujUtedc06ma24GthedIgZcIt5HJ+KIeYV1GLzp7SIokuKWjCq06o\ncU36LDpZRQKBgFSAomIQToaTeKWICnEj+lkwJQ+x9hJAvAVOldvXI71s4WD4+uJQ\nVW5dZ+mVUHoAcViZ1YpPWeq+uf6Vk9Oz34rlwHCyl/AYtvgeW4+WGxbO7FlgfxDA\nkEI4MWTia8h9ds4Md/EupJGRf/PIP2IOTWfUkHE6OLjtEmLQTPGNOF/FAoGAPN/D\nWN7WBrkTIycR5LSXDjt4PPJOFStOHb+09HpGY/LilQFZih49DXvw5Q6T9gZIZGa1\n01MuzZbKINowB77kcQbE15lr6YMOT3LZnma2NIZvR8aFvLO3OfUF0b5zIkRAOYIQ\nCMOT0DTPBz3Mh+yP6YpznGeCh2/G9Mf480kHyLECgYBzuRxcI8x/duyoR5e9Us/7\nT6EbjFaGrkcTUWGMjYVjXyeUwjkNRgK3gdrm1T37fx/lRelQ5YZeWo5JTorclI2d\nx4gNuxqDUDI3CSh6gMb+aRImu5UCr+OHI9yzWt1hCGWVKWehx7CiEESZ2GpoYaAn\nmdI0gDHAsD4BgssqKCWv/g==\n-----END PRIVATE KEY-----\n",
+  "client_email": "sydney-254@automeasure.iam.gserviceaccount.com",
+  "client_id": "115153037706887546792",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sydney-254%40automeasure.iam.gserviceaccount.com"
+}

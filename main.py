@@ -14,7 +14,19 @@ from math import dist
 from scipy.spatial import distance
 from collections import namedtuple
 from itertools import product
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
+scope = ["https://spreadsheets.google.com/feeds",
+        'https://www.googleapis.com/auth/spreadsheets',
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive"]
+
+#CREDENTIALS FROM GOOGLE SERVICE ACCOUNT
+creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+client = gspread.authorize(creds)
+sheet = client.open_by_key("1Pfn_Dx_hEWGChU74iamO3BM4giSL7MpbuepGVo6_Bpk")  
+SamplePOMSheet = sheet.worksheet("RAWDATA")
 
 
 def pom():
@@ -287,4 +299,4 @@ def pom():
     pomIndex +=1    #pomindex a to b
 
 
-pom() # offset test
+# pom() # offset test
