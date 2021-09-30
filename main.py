@@ -216,57 +216,62 @@ def pom():
 
         cell = SamplePOMSheet.find(pomID)
         pomID1 = (cell.row)
-        # pomOffset =[[157,393,213,350]]
-        pomOffset = str([[SamplePOMSheet.cell(pomID1,11).value]]).replace("'", "")
+        # pomOffset =[[20,10,300,50]]
+        offsetX = int(SamplePOMSheet.cell(pomID1,11).value)
+        offsetY = int(SamplePOMSheet.cell(pomID1,12).value)
+        offsetX2 = int(SamplePOMSheet.cell(pomID1,13).value)
+        offsetY2 = int(SamplePOMSheet.cell(pomID1,14).value)
+        pomOffset = [[offsetX,offsetY,offsetX2,offsetY2]]
         print(pomOffset)
-        poms = [glob.glob('poms\\FrontNeck-FromHPS\\*.jpg')]
+        # poms = [glob.glob('poms\\FrontNeck-FromHPS\\*.jpg')]
         # pomOffset =[[0,0,0,0]]
         pomIndex = 0
         pixelToInch = 16 #camera height - 39 inches to 40
         # pixelToInch = 39.50
         resultD = []
 
-        for pom in poms:
+        # for pom in poms:
 
-            img = cv.imread(imageToBeInspected,0)
+        img = cv.imread(imageToBeInspected,0)
+        
+        img2 = img.copy()
+        
+        templAB = cv.imread(SamplePOMSheet.cell(pomID1,9).value) # pom start
+        templBA = cv.imread(SamplePOMSheet.cell(pomID1,10).value)
+        print(templAB)
+        w, h = templAB.shape[::-1]
+        w2, h2 = templBA.shape[::-1]
+        # All the 6 methods for comparison in a list
+        methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+                'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
+        meth = methods[1] # Mehtod setting
+        img = img2.copy()
+        methodAB = eval(meth)
+        # Apply template Matching
+        res = cv.matchTemplate(img,templAB,methodAB)
+        res2 = cv.matchTemplate(img,templBA,methodAB)
+        min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
+        min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
+        
+        # print(min_loc, max_loc, min_loc2, max_loc2)
+        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
+        if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
+            top_left = min_loc
+            top_left2 = min_loc2
             
-            img2 = img.copy()
-            
-            templAB = cv.imread(pom[0],0) # pom start
-            templBA = cv.imread(pom[1],0)
-            w, h = templAB.shape[::-1]
-            w2, h2 = templBA.shape[::-1]
-            # All the 6 methods for comparison in a list
-            methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
-                    'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
-            meth = methods[1] # Mehtod setting
-            img = img2.copy()
-            methodAB = eval(meth)
-            # Apply template Matching
-            res = cv.matchTemplate(img,templAB,methodAB)
-            res2 = cv.matchTemplate(img,templBA,methodAB)
-            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
-            min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
-           
-            # print(min_loc, max_loc, min_loc2, max_loc2)
-            # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
-            if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
-                top_left = min_loc
-                top_left2 = min_loc2
-               
-            else:
-                top_left = max_loc
-                top_left2 = max_loc2
+        else:
+            top_left = max_loc
+            top_left2 = max_loc2
 
-            pomD = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
-            
-            pomD2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
-            
-            resultD.append((pomD2[1]+pomD[1])/pixelToInch)
+        pomD = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
+        
+        pomD2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
+        
+        resultD.append((pomD2[1]+pomD[1])/pixelToInch)
 
-           # Return True
-           
-            print("FrontLength-FromHPS:",round(resultD[pomIndex],2),"inches") # pom end
+        # Return True
+        
+        print("FrontLength-FromHPS:",round(resultD[pomIndex],2),"inches") # pom end
   
     except NameError as e:
         print(e)
@@ -277,7 +282,7 @@ def pom():
     # cv.putText(img, "->B: "+ str(round(resultB[pomIndex],3)) , (pomB), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2)
     # cv.line(img,pomC, pomC2, 255, 2)    #neck width seam to seam
     # cv.putText(img, "->C: "+ str(round(resultC[pomIndex],3)) , (pomC), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2)
-    cv.line(img,pomD, pomD2, 255, 2)    #Front length- from HPS
+    cv.rectangle(img,pomD, pomD2, 255, 2)    #Front length- from HPS
     cv.putText(img, "->D: "+ str(round(resultD[pomIndex],2)) , (np.add(pomD,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
                                                            # Result box
     # root = Tk()
