@@ -198,7 +198,6 @@ def pom():
     #             top_left = max_loc
     #             top_left2 = max_loc2
               
-                
     #         pomC = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
     #         pomC2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
           
@@ -216,9 +215,10 @@ def pom():
     try:
 
         cell = SamplePOMSheet.find(pomID)
-        pomID1 = (cell.row, cell.col)
+        pomID1 = (cell.row)
         # pomOffset =[[157,393,213,350]]
-        pomOffset = [[SamplePOMSheet.cell(pomID1[0],11).value]]
+        pomOffset = str([[SamplePOMSheet.cell(pomID1,11).value]]).replace("'", "")
+        print(pomOffset)
         poms = [glob.glob('poms\\FrontNeck-FromHPS\\*.jpg')]
         # pomOffset =[[0,0,0,0]]
         pomIndex = 0
