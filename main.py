@@ -236,7 +236,7 @@ def pom():
         
         img2 = img.copy()
         
-        templAB = cv.imread(SamplePOMSheet.cell(pomID1,9).value) # pom start
+        templAB = cv.imread(SamplePOMSheet.cell(pomID1,9).value) 
         templBA = cv.imread(SamplePOMSheet.cell(pomID1,10).value)
         print(templAB)
         w, h = templAB.shape[::-1]
