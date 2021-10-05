@@ -1,3 +1,4 @@
+from numpy.core.fromnumeric import size
 from main import pom
 import tkinter as tk
 import os
@@ -9,6 +10,7 @@ import imutils
 
 fileName = os.environ['ALLUSERSPROFILE'] + "\WebcamCap.txt"
 cancel = False
+
 
 def prompt_ok(event = 0):
     global cancel, button, button2
