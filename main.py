@@ -17,6 +17,10 @@ from collections import namedtuple
 from itertools import product
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import gdown
+from tkinter import *
+from tkinter.ttk import *
+import time
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
@@ -28,82 +32,109 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key("1Pfn_Dx_hEWGChU74iamO3BM4giSL7MpbuepGVo6_Bpk")  
 SamplePOMSheet = sheet.worksheet("RAWDATA")
-SamplePOMSheet = sheet.worksheet("subImg1")
-SamplePOMSheet = sheet.worksheet("subImg2")
-stylenum = ""   # will use for entering stylenum
-stylesize = "" # also for style size
+styleDtlSheet = sheet.worksheet("code")
+
+
 
 def pom():
+    resultCount = styleDtlSheet.cell(2,6).value
+    print(resultCount)
+    styleCount = styleDtlSheet.cell(2,3).value
+    print (styleCount)
+    pomIDs = styleDtlSheet.col_values(5)
+    print(pomIDs)
+    GB = int(styleCount)
+    styles = 0
+    speed = 1
+    
 
     imageToBeInspected = 'calresult\\imageCap.jpg'    #acting as camera
-    pomID = '7M71906MFRONTLENGTH-FROMHPS'
-   
-    try:
+    # pomID = '7M71906MFRONTLENGTHFROMHPS'   # change later for stylenum while loop
+    
+    for poms in pomIDs[1:]:
 
-        cell = SamplePOMSheet.find(pomID)
-        pomID1 = (cell.row)
-        # pomOffset =[[20,10,300,50]]
-        offsetX = int(SamplePOMSheet.cell(pomID1,11).value)
-        offsetY = int(SamplePOMSheet.cell(pomID1,12).value)
-        offsetX2 = int(SamplePOMSheet.cell(pomID1,13).value)
-        offsetY2 = int(SamplePOMSheet.cell(pomID1,14).value)
-        pomOffset = [[offsetX,offsetY,offsetX2,offsetY2]]
-        print(pomOffset)
-        
-        pomIndex = 0
-        pixelToInch = 16 #camera height - 39 inches to 40
-        
-        resultD = []
-
-        # for pom in poms:
-
-        img = cv.imread(imageToBeInspected,0)
-        
-        img2 = img.copy()
-        
-        templAB = (SamplePOMSheet.cell(pomID1,9).value) 
-        templBA = (SamplePOMSheet.cell(pomID1,10).value)
-        print(templAB)
-        w, h = templAB.shape[::-1]
-        w2, h2 = templBA.shape[::-1]
-        # All the 6 methods for comparison in a list
-        methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
-                'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
-        meth = methods[1] # Mehtod setting
-        img = img2.copy()
-        methodAB = eval(meth)
-        # Apply template Matching
-        res = cv.matchTemplate(img,templAB,methodAB)
-        res2 = cv.matchTemplate(img,templBA,methodAB)
-        min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
-        min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
-        
-        # print(min_loc, max_loc, min_loc2, max_loc2)
-        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
-        if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
-            top_left = min_loc
-            top_left2 = min_loc2
+        try:
             
-        else:
-            top_left = max_loc
-            top_left2 = max_loc2
+            cell = SamplePOMSheet.find(poms)
+            bar['value']+=(speed/GB)*100
+            styles+=speed
+            percent.set(str(int((styles/GB)*100))+"%")
+            text.set(str(styles)+"/"+str(GB)+" styles completed")
+            window.update_idletasks()
+            pomID1 = (cell.row)
+            # pomOffset =[[20,10,300,50]]
+            offsetX = int(SamplePOMSheet.cell(pomID1,14).value)
+            offsetY = int(SamplePOMSheet.cell(pomID1,15).value)
+            offsetX2 = int(SamplePOMSheet.cell(pomID1,16).value)
+            offsetY2 = int(SamplePOMSheet.cell(pomID1,17).value)
+            pomOffset = [[offsetX,offsetY,offsetX2,offsetY2]]
+            subimg1lnk = SamplePOMSheet.cell(pomID1,10).value
+            subimg2lnk = SamplePOMSheet.cell(pomID1,12).value
+            measureName = SamplePOMSheet.cell(pomID1,5).value
+            url1 = subimg1lnk
+            url2 = subimg2lnk
+            output1 = 'subImg1.JPG'
+            output2 = 'subImg2.JPG'
+            gdown.download(url1, output1, quiet=False)
+            gdown.download(url2, output2, quiet=False)
+            print(pomOffset)
+            
+            pomIndex = 0
+            pixelToInch = 16 #camera height - 39 inches to 40
+            
+            resultD = []
 
-        pomD = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
-        
-        pomD2 = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
-        
-        resultD.append((pomD2[1]+pomD[1])/pixelToInch)
+            # for pom in poms:
 
-        # Return True
-        
-        print("FrontLength-FromHPS:",round(resultD[pomIndex],2),"inches") # pom end
-  
-    except NameError as e:
-        print(e)
-        
+            img = cv.imread(imageToBeInspected,0)
+            
+            img2 = img.copy()
+            
+            templAB = cv.imread("subImg1.JPG",0) 
+            templBA = cv.imread("subImg2.JPG",0)
+            w, h = templAB.shape[::-1]
+            w2, h2 = templBA.shape[::-1]
+            # All the 6 methods for comparison in a list
+            methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+                    'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
+            meth = methods[1] # Mehtod setting
+            img = img2.copy()
+            methodAB = eval(meth)
+            # Apply template Matchingpip i
+            res = cv.matchTemplate(img,templAB,methodAB)
+            res2 = cv.matchTemplate(img,templBA,methodAB)
+            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
+            min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
+            
+            # print(min_loc, max_loc, min_loc2, max_loc2)
+            # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
+            if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
+                top_left = min_loc
+                top_left2 = min_loc2
+                
+            else:
+                top_left = max_loc
+                top_left2 = max_loc2
+                print (top_left)
+                print (top_left2)
 
-    cv.rectangle(img,pomD, pomD2, 255, 2)    #Front length- from HPS
-    cv.putText(img, "->D: "+ str(round(resultD[pomIndex],2)) , (np.add(pomD,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
+            subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
+            
+            subImg2pom = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
+            
+            resultD.append((subImg2pom[1]+subImg1pom[1])/pixelToInch)
+
+            # Return True
+            
+            print(measureName+":",round(resultD[pomIndex],2),"inches") # pom end
+            SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
+            
+        except NameError as e:
+            print(e)
+            
+
+        cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    #Front length- from HPS
+        cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
                                                            # Result box
     
     # plt.subplot(121),plt.imshow(res,cmap = 'gray')
@@ -118,5 +149,16 @@ def pom():
     plt.show()
     pomIndex +=1    #pomindex a to b
 
+
+window = Tk()
+
+percent = StringVar()
+text = StringVar()
+
+bar = Progressbar(window,orient=HORIZONTAL,length=300)
+bar.pack(pady=10)
+
+percentLabel = Label(window,textvariable=percent).pack()
+taskLabel = Label(window,textvariable=text).pack()
 
 pom() # offset test

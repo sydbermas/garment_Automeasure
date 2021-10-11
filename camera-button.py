@@ -128,5 +128,5 @@ def show_frame():
         lmain.after(10, show_frame)
 
 show_frame()
-
+exec(open("tkinterEntry.py").read())
 mainWindow.mainloop()
