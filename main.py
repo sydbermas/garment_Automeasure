@@ -59,7 +59,7 @@ def pom():
             bar['value']+=(speed/GB)*100
             styles+=speed
             percent.set(str(int((styles/GB)*100))+"%")
-            text.set(str(styles)+"/"+str(GB)+" styles completed")
+            text.set(str(styles)+"/"+str(GB)+" Point of measure processed")
             window.update_idletasks()
             pomID1 = (cell.row)
             # pomOffset =[[20,10,300,50]]
@@ -161,4 +161,4 @@ bar.pack(pady=10)
 percentLabel = Label(window,textvariable=percent).pack()
 taskLabel = Label(window,textvariable=text).pack()
 
-pom() # offset test
+# pom() # offset test

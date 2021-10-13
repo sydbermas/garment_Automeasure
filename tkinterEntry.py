@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 import gspread
+from numpy import empty
 from oauth2client.service_account import ServiceAccountCredentials
 
 scope = ["https://spreadsheets.google.com/feeds",
@@ -16,10 +17,11 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key("1Pfn_Dx_hEWGChU74iamO3BM4giSL7MpbuepGVo6_Bpk")  
 styleDtlSheet = sheet.worksheet("code")
+SamplePOMSheet = sheet.worksheet("RAWDATA")
 
 # root window
 root = tk.Tk()
-root.geometry("300x200")
+root.geometry("300x250")
 root.resizable(False, False)
 root.title('Style Details')
 
@@ -48,9 +50,30 @@ def login_clicked():
         message=msg
     )
 
+
+
+
+def clear_clicked():
+
+    """ callback when the button clicked
+    """
+    msg = f'You clear all data results!'
+    # SamplePOMSheet.clear('R2:R', "")
+    range_of_cells = SamplePOMSheet.range('R2:R1000')
+    for cell in range_of_cells:
+        cell.value = ''
+    SamplePOMSheet.update_cells(range_of_cells) 
+  
+
+    showinfo(
+        title='Information',
+        message=msg
+    )
+
 # Sign in frame
 proceed = ttk.Frame(root)
 proceed.pack(padx=10, pady=10, fill='x', expand=True)
+
 
 # stylenums
 stylenum_label = ttk.Label(proceed, text="Style Number:")
@@ -82,5 +105,9 @@ view_entry.pack(fill='x', expand=True)
 # login button
 proceed_button = ttk.Button(proceed, text="Proceed", command=login_clicked)
 proceed_button.pack(fill='x', expand=True, pady=10)
+
+# login button
+clear_button = ttk.Button(proceed, text="Clear", command=clear_clicked)
+clear_button.pack(fill='x', expand=True, pady=10)
 
 root.mainloop()
