@@ -1,116 +1,128 @@
-import tkinter as tk
-import os
+import numpy as np
 import cv2
-import sys
+import tkinter as tk
 from PIL import Image, ImageTk
-import numpy
+import tkinter as tk
+from tkinter import Label, ttk
+from tkinter.messagebox import showinfo
+import gspread
+from numpy import empty
+from oauth2client.service_account import ServiceAccountCredentials
 
-fileName = os.environ['ALLUSERSPROFILE'] + "\WebcamCap.txt"
-cancel = False
+scope = ["https://spreadsheets.google.com/feeds",
+        'https://www.googleapis.com/auth/spreadsheets',
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive"]
 
-def prompt_ok(event = 0):
-    global cancel, button, button1, button2
-    cancel = True
+#CREDENTIALS FROM GOOGLE SERVICE ACCOUNT
+creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+client = gspread.authorize(creds)
+sheet = client.open_by_key("1Pfn_Dx_hEWGChU74iamO3BM4giSL7MpbuepGVo6_Bpk")  
+styleDtlSheet = sheet.worksheet("code")
+SamplePOMSheet = sheet.worksheet("RAWDATA")
 
-    button.place_forget()
-    button1 = tk.Button(mainWindow, text="Good Image!", command=saveAndExit)
-    button2 = tk.Button(mainWindow, text="Try Again", command=resume)
-    button1.place(anchor=tk.CENTER, relx=0.2, rely=0.9, width=150, height=50)
-    button2.place(anchor=tk.CENTER, relx=0.8, rely=0.9, width=150, height=50)
-    button1.focus()
+#Set up GUI
+window = tk.Tk()  #Makes main window
+window.wm_title("Ubase Automeasure")
+window.config(background="#FFFFFF")
 
-def saveAndExit(event = 0):
-    global prevImg
+#Graphics window
+imageFrame = tk.Frame(window, width=600, height=500)
+imageFrame.grid(row=0, column=0, padx=10, pady=2)
 
-    if (len(sys.argv) < 2):
-        filepath = "imageCap.jpg"
-    else:
-        filepath = sys.argv[1]
-
-    print ("Output file to: " + filepath)
-    prevImg.save(filepath)
-    mainWindow.quit()
-
-def resume(event = 0):
-    global button1, button2, button, lmain, cancel
-
-    cancel = False
-
-    button1.place_forget()
-    button2.place_forget()
-
-    mainWindow.bind('<Return>', prompt_ok)
-    button.place(bordermode=tk.INSIDE, relx=0.5, rely=0.9, anchor=tk.CENTER, width=300, height=50)
-    lmain.after(10, show_frame)
-
-def changeCam(event=0, nextCam=-1):
-    global camIndex, cap, fileName
-
-    if nextCam == -1:
-        camIndex += 1
-    else:
-        camIndex = nextCam
-    del(cap)
-    cap = cv2.VideoCapture(camIndex)
-
-    #try to get a frame, if it returns nothing
-    success, frame = cap.read()
-    if not success:
-        camIndex = 0
-        del(cap)
-        cap = cv2.VideoCapture(camIndex)
-
-    f = open(fileName, 'w')
-    f.write(str(camIndex))
-    f.close()
-
-try:
-    f = open(fileName, 'r')
-    camIndex = int(f.readline())
-except:
-    camIndex = 0
-
-cap = cv2.VideoCapture(camIndex)
-capWidth = cap.get(3)
-capHeight = cap.get(4)
-
-success, frame = cap.read()
-if not success:
-    if camIndex == 0:
-        print("Error, No webcam found!")
-        sys.exit(1)
-    else:
-        changeCam(nextCam=0)
-        success, frame = cap.read()
-        if not success:
-            print("Error, No webcam found!")
-            sys.exit(1)
-
-
-mainWindow = tk.Tk(screenName="Camera Capture")
-mainWindow.resizable(width=False, height=False)
-mainWindow.bind('<Escape>', lambda e: mainWindow.quit())
-lmain = tk.Label(mainWindow, compound=tk.CENTER, anchor=tk.CENTER, relief=tk.RAISED)
-button = tk.Button(mainWindow, text="Capture", command=prompt_ok)
-button_changeCam = tk.Button(mainWindow, text="Switch Camera", command=changeCam)
-
-lmain.pack()
-button.place(bordermode=tk.INSIDE, relx=0.5, rely=0.9, anchor=tk.CENTER, width=300, height=50)
-button.focus()
-button_changeCam.place(bordermode=tk.INSIDE, relx=0.85, rely=0.1, anchor=tk.CENTER, width=150, height=50)
-
+#Capture video frames
+lmain = tk.Label(imageFrame)
+lmain.grid(row=0, column=0)
+cap = cv2.VideoCapture(0)
 def show_frame():
-    global cancel, prevImg, button
-
     _, frame = cap.read()
+    frame = cv2.flip(frame, 1)
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-
-    prevImg = Image.fromarray(cv2image)
-    imgtk = ImageTk.PhotoImage(image=prevImg)
+    img = Image.fromarray(cv2image)
+    imgtk = ImageTk.PhotoImage(image=img)
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
-    if not cancel:
-        lmain.after(10, show_frame)
+    lmain.after(10, show_frame) 
 
-show_frame()
-mainWindow.mainloop()
+# store email address and password
+stylenum = tk.StringVar()
+sizeset = tk.StringVar()
+view = tk.StringVar()
+
+views = ('Front', 'Back', 'Other')
+selected_view = tk.StringVar()
+
+sizes = ('XS', 'S', 'M','L', 'XL', 'XXL')
+selected_sizes = tk.StringVar()
+
+
+
+def login_clicked():
+    """ callback when the button clicked
+    """
+    msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}'
+    styleDtlSheet.update('B2', stylenum.get())
+    styleDtlSheet.update('B3', sizeset_entry.get())
+    styleDtlSheet.update('B4', view_entry.get())
+
+    showinfo(
+        title='Information',
+        message=msg
+    )
+
+
+def clear_clicked():
+    
+    """ callback when the button clicked
+    """
+    msg = f'You clear all data results!'
+    # SamplePOMSheet.clear('R2:R', "")
+
+    sheet.values_clear("RAWDATA!R2:R10000")
+  
+    showinfo(
+        title='Information',
+        message=msg
+    )
+
+
+# # Sign in frame
+# proceed = ttk.Frame(window)
+# proceed.pack(padx=10, pady=10, fill='x', expand=True)
+
+# stylenums
+stylenum_label = ttk.Label(window, text="Style Number:")
+stylenum_label.pack(fill='x', expand=True)
+
+stylenum_entry = ttk.Entry(window, textvariable=stylenum)
+stylenum_entry.pack(fill='x', expand=False)
+stylenum_entry.focus()
+
+# sizesets
+sizeset_label = ttk.Label(window, text="Sizeset:")
+sizeset_label.pack(fill='x', expand=True)
+
+sizeset_entry = ttk.Combobox(window, textvariable=selected_sizes)
+sizeset_entry['values'] = sizes
+sizeset_entry['state'] = 'readonly'  # normal
+sizeset_entry.pack(fill='x', expand=True)
+
+# views
+view_label = ttk.Label(window, text="View:")
+view_label.pack(fill='x', expand=True)
+
+view_entry = ttk.Combobox(window, textvariable=selected_view)
+view_entry['values'] = views
+view_entry['state'] = 'readonly'  # normal
+view_entry.pack(fill='x', expand=True)
+
+# login button
+proceed_button = ttk.Button(window, text="Proceed", command=login_clicked)
+proceed_button.pack(fill='x', expand=True, pady=10)
+
+# login button
+clear_button = ttk.Button(window, text="Clear", command=clear_clicked)
+clear_button.pack(fill='x', expand=True, pady=10)
+
+show_frame()  #Display 2
+window.mainloop()  #Starts GUI
