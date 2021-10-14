@@ -38,9 +38,7 @@ styleDtlSheet = sheet.worksheet("code")
 
 def pom():
     resultCount = styleDtlSheet.cell(2,6).value
-    print(resultCount)
     styleCount = styleDtlSheet.cell(2,3).value
-    print (styleCount)
     pomIDs = styleDtlSheet.col_values(5)
     print(pomIDs)
     GB = int(styleCount)
@@ -68,20 +66,13 @@ def pom():
             offsetX2 = int(SamplePOMSheet.cell(pomID1,16).value)
             offsetY2 = int(SamplePOMSheet.cell(pomID1,17).value)
             pomOffset = [[offsetX,offsetY,offsetX2,offsetY2]]
-            subimg1lnk = SamplePOMSheet.cell(pomID1,10).value
-            subimg2lnk = SamplePOMSheet.cell(pomID1,12).value
-            measureName = SamplePOMSheet.cell(pomID1,5).value
-            url1 = subimg1lnk
-            url2 = subimg2lnk
-            output1 = 'subImg1.JPG'
-            output2 = 'subImg2.JPG'
-            gdown.download(url1, output1, quiet=False)
-            gdown.download(url2, output2, quiet=False)
+            pomUID = SamplePOMSheet.cell(pomID1,2).value
+            styleName = SamplePOMSheet.cell(pomID1,3).value
+            output1 = 'subImages\\'+styleName+'\subImg1\\'+pomUID+'.JPG'
+            output2 = 'subImages\\'+styleName+'\subImg2\\'+pomUID+'.JPG'
             print(pomOffset)
-            
             pomIndex = 0
             pixelToInch = 16 #camera height - 39 inches to 40
-            
             resultD = []
 
             # for pom in poms:
@@ -90,8 +81,8 @@ def pom():
             
             img2 = img.copy()
             
-            templAB = cv.imread("subImg1.JPG",0) 
-            templBA = cv.imread("subImg2.JPG",0)
+            templAB = cv.imread(output1,0) 
+            templBA = cv.imread(output2,0)
             w, h = templAB.shape[::-1]
             w2, h2 = templBA.shape[::-1]
             # All the 6 methods for comparison in a list
@@ -126,14 +117,13 @@ def pom():
 
             # Return True
             
-            print(measureName+":",round(resultD[pomIndex],2),"inches") # pom end
+            print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
             SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
             
         except NameError as e:
             print(e)
             
-
-        cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    #Front length- from HPS
+        cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
         cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
                                                            # Result box
     
@@ -148,7 +138,6 @@ def pom():
     mng.window.state("zoomed")
     plt.show()
     pomIndex +=1    #pomindex a to b
-
 
 window = Tk()
 

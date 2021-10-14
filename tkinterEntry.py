@@ -1,16 +1,18 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import Label, ttk
+import tkinter
 from tkinter.messagebox import showinfo
 import gspread
 from numpy import empty
 from oauth2client.service_account import ServiceAccountCredentials
+import cv2
+from PIL import Image,ImageTk
+
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
         "https://www.googleapis.com/auth/drive.file",
         "https://www.googleapis.com/auth/drive"]
-
-
 
 #CREDENTIALS FROM GOOGLE SERVICE ACCOUNT
 creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
@@ -21,7 +23,7 @@ SamplePOMSheet = sheet.worksheet("RAWDATA")
 
 # root window
 root = tk.Tk()
-root.geometry("300x250")
+root.geometry("650x690")
 root.resizable(False, False)
 root.title('Style Details')
 
@@ -35,6 +37,7 @@ selected_view = tk.StringVar()
 
 sizes = ('XS', 'S', 'M','L', 'XL', 'XXL')
 selected_sizes = tk.StringVar()
+
 
 
 def login_clicked():
@@ -51,20 +54,15 @@ def login_clicked():
     )
 
 
-
-
 def clear_clicked():
-
+    
     """ callback when the button clicked
     """
     msg = f'You clear all data results!'
     # SamplePOMSheet.clear('R2:R', "")
-    range_of_cells = SamplePOMSheet.range('R2:R1000')
-    for cell in range_of_cells:
-        cell.value = ''
-    SamplePOMSheet.update_cells(range_of_cells) 
-  
 
+    sheet.values_clear("RAWDATA!R2:R10000")
+  
     showinfo(
         title='Information',
         message=msg
@@ -80,7 +78,7 @@ stylenum_label = ttk.Label(proceed, text="Style Number:")
 stylenum_label.pack(fill='x', expand=True)
 
 stylenum_entry = ttk.Entry(proceed, textvariable=stylenum)
-stylenum_entry.pack(fill='x', expand=True)
+stylenum_entry.pack(fill='x', expand=False)
 stylenum_entry.focus()
 
 # sizesets
