@@ -21,6 +21,7 @@ import gdown
 from tkinter import *
 from tkinter.ttk import *
 import time
+from tkinter.messagebox import showinfo
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
@@ -34,8 +35,6 @@ sheet = client.open_by_key("1Pfn_Dx_hEWGChU74iamO3BM4giSL7MpbuepGVo6_Bpk")
 SamplePOMSheet = sheet.worksheet("RAWDATA")
 styleDtlSheet = sheet.worksheet("code")
 
-
-
 def pom():
     resultCount = styleDtlSheet.cell(2,6).value
     styleCount = styleDtlSheet.cell(2,3).value
@@ -43,7 +42,7 @@ def pom():
     print(pomIDs)
     GB = int(styleCount)
     styles = 0
-    speed = 1
+    speed = int(resultCount)
     
 
     imageToBeInspected = 'calresult\\imageCap.jpg'    #acting as camera
@@ -58,7 +57,7 @@ def pom():
             styles+=speed
             percent.set(str(int((styles/GB)*100))+"%")
             text.set(str(styles)+"/"+str(GB)+" Point of measure processed")
-            window.update_idletasks()
+            window1.update_idletasks()
             pomID1 = (cell.row)
             # pomOffset =[[20,10,300,50]]
             offsetX = int(SamplePOMSheet.cell(pomID1,14).value)
@@ -126,7 +125,10 @@ def pom():
         cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
         cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
                                                            # Result box
-    
+    showinfo(
+        title='Information',
+        message=f'Scan Done.'
+    )
     # plt.subplot(121),plt.imshow(res,cmap = 'gray')
     # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
     plt.subplot(121),plt.imshow(img,cmap = 'gray')
@@ -139,15 +141,15 @@ def pom():
     plt.show()
     pomIndex +=1    #pomindex a to b
 
-window = Tk()
+window1 = Tk()
 
 percent = StringVar()
 text = StringVar()
 
-bar = Progressbar(window,orient=HORIZONTAL,length=300)
+bar = Progressbar(window1,orient=HORIZONTAL,length=300)
 bar.pack(pady=10)
 
-percentLabel = Label(window,textvariable=percent).pack()
-taskLabel = Label(window,textvariable=text).pack()
+percentLabel = Label(window1,textvariable=percent).pack()
+taskLabel = Label(window1,textvariable=text).pack()
 
-# pom()
+pom()

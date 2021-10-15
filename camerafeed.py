@@ -8,6 +8,7 @@ from tkinter.messagebox import showinfo
 import gspread
 from numpy import empty
 from oauth2client.service_account import ServiceAccountCredentials
+from main import pom
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
@@ -28,11 +29,11 @@ window.config(background="#FFFFFF")
 
 #Graphics window
 imageFrame = tk.Frame(window, width=600, height=500)
-imageFrame.grid(row=0, column=0, padx=10, pady=2)
+imageFrame.pack(fill='x', expand=True)
 
 #Capture video frames
 lmain = tk.Label(imageFrame)
-lmain.grid(row=0, column=0)
+lmain.pack(fill='x', expand=True) 
 cap = cv2.VideoCapture(0)
 def show_frame():
     _, frame = cap.read()
@@ -56,8 +57,7 @@ sizes = ('XS', 'S', 'M','L', 'XL', 'XXL')
 selected_sizes = tk.StringVar()
 
 
-
-def login_clicked():
+def proceed_clicked():
     """ callback when the button clicked
     """
     msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}'
@@ -69,6 +69,8 @@ def login_clicked():
         title='Information',
         message=msg
     )
+
+    pom()
 
 
 def clear_clicked():
@@ -117,7 +119,7 @@ view_entry['state'] = 'readonly'  # normal
 view_entry.pack(fill='x', expand=True)
 
 # login button
-proceed_button = ttk.Button(window, text="Proceed", command=login_clicked)
+proceed_button = ttk.Button(window, text="Proceed", command=proceed_clicked)
 proceed_button.pack(fill='x', expand=True, pady=10)
 
 # login button
