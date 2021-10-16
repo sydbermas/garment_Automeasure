@@ -15,6 +15,7 @@ from oauth2client.client import Error
 from oauth2client.service_account import ServiceAccountCredentials
 import time
 import pyautogui
+import random
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
@@ -32,7 +33,7 @@ SamplePOMSheet = sheet.worksheet("RAWDATA")
 #Set up GUI
 window = tk.Tk()  #Makes main window
 window.wm_title("Ubase Automeasure")
-window.config(background="#FFFFFF")
+window.config(background="#404040")
 
 #Graphics window
 imageFrame = tk.Frame(window, width=600, height=500)
@@ -41,7 +42,7 @@ imageFrame.pack(side=LEFT, expand=False)
 #Capture video frames
 lmain = tk.Label(imageFrame)
 lmain.pack(side=LEFT, expand=False) 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(int(styleDtlSheet.cell(2,7).value),cv.CAP_DSHOW)
 def show_frame():
     _, frame = cap.read()
     frame = cv.flip(frame, 1)
@@ -85,7 +86,6 @@ def proceed_clicked():
     styleDtlSheet.update('B3', sizeset_entry.get())
     styleDtlSheet.update('B4', view_entry.get())
     
-
     showinfo(
         title='Information',
         message=msg
@@ -102,9 +102,10 @@ def proceed_clicked():
         try:
             
             cell = SamplePOMSheet.find(poms)
+            cell2 = styleDtlSheet.find(poms)
             
             pomID1 = (cell.row)
-            # pomOffset =[[20,10,300,50]]
+            offSetID = (cell2.row)
             offsetX = int(SamplePOMSheet.cell(pomID1,14).value)
             offsetY = int(SamplePOMSheet.cell(pomID1,15).value)
             offsetX2 = int(SamplePOMSheet.cell(pomID1,16).value)
@@ -152,6 +153,7 @@ def proceed_clicked():
                 top_left2 = max_loc2
                 print (top_left)
                 print (top_left2)
+                styleDtlSheet.update_cell(offSetID, 8, (str(top_left)+','+str(top_left2)))
 
             subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
             
@@ -160,19 +162,18 @@ def proceed_clicked():
             resultD.append((subImg2pom[1]+subImg1pom[1])/pixelToInch)
 
             # Return True
-            
             print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
             SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
             
             text.set(str(styleDtlSheet.cell(2,6).value)+"/"+str(styleDtlSheet.cell(2,3).value))
             window.update_idletasks()
-            
+            cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
+            cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
+            time.sleep(2.3)
+        
         except NameError as e:
             print(e)
             
-        cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
-        cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
-        time.sleep(2.3)
     result = int(styleDtlSheet.cell(2,6).value)
     total = int(styleDtlSheet.cell(2,3).value)
     if result == total :
@@ -199,7 +200,8 @@ def clear_clicked():
     # SamplePOMSheet.clear('R2:R', "")
 
     sheet.values_clear("RAWDATA!R2:R10000")
-  
+    sheet.values_clear("code!H2:H10000")
+
     showinfo(
         title='Information',
         message=msg
@@ -209,10 +211,6 @@ def clear_clicked():
     selected_view.set("")
     text.set("")    
     
-# # Sign in frame
-# proceed = ttk.Frame(window)
-# proceed.pack(padx=10, pady=10, fill='x', expand=True)
-
 # stylenums
 stylenum_label = ttk.Label(window, text="Style Number:")
 stylenum_label.pack(fill='x', expand=False)
@@ -239,18 +237,59 @@ view_entry['values'] = views
 view_entry['state'] = 'readonly'  # normal
 view_entry.pack(fill='x', expand=False)
 
+#camera scrollbar
+camscr_label = ttk.Label(window, text="Camera Zoom:")
+camscr_label.pack(fill='x', expand=False)
+
+camscr_entry = ttk.Scale(window,command = "")
+camscr_entry.pack(fill='x', expand=False)
+
+#camera Positive X
+camX_label = ttk.Label(window, text="MoveLeft:")
+camX_label.pack(fill='x', expand=False)
+
+camX_entry = ttk.Scale(window,command = "")
+camX_entry.pack(fill='x', expand=False)
+
+#camera Positive X
+camXX_label = ttk.Label(window, text="MoveRight:")
+camXX_label.pack(fill='x', expand=False)
+
+camXX_entry = ttk.Scale(window,command = "")
+camXX_entry.pack(fill='x', expand=False)
+
+#camera Positive X
+camY_label = ttk.Label(window, text="MoveUp:")
+camY_label.pack(fill='x', expand=False)
+
+camY_entry = ttk.Scale(window,command = "")
+camY_entry.pack(fill='x', expand=False)
+
+#camera Positive X
+camYY_label = ttk.Label(window, text="MoveDown:")
+camYY_label.pack(fill='x', expand=False)
+
+camYY_entry = ttk.Scale(window,command = "")
+camYY_entry.pack(fill='x', expand=False)
+
 # login button
-proceed_button = ttk.Button(window, text="Proceed", command=proceed_clicked)
-proceed_button.pack(fill='x', expand=False, pady=3)
+proceed_button = ttk.Button(window, text="Get POM", command=proceed_clicked)
+proceed_button.pack(fill='x', expand=False)
+
+# login button
+templCap_button = ttk.Button(window, text="Capture Templates", command="")
+templCap_button.pack(fill='x', expand=False)
 
 # login button
 clear_button = ttk.Button(window, text="Clear", command=clear_clicked)
-clear_button.pack(fill='x', expand=False, pady=3)
+clear_button.pack(fill='x', expand=False)
 
 
 text = StringVar()
 
 taskLabel = Label(window,textvariable=text).pack(fill='x', expand=False)
+
+
 
 show_frame()  #Display 2
 window.mainloop()  #Starts GUI
