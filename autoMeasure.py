@@ -64,15 +64,15 @@ selected_view = tk.StringVar()
 sizes = ('XS', 'S', 'M','L', 'XL', 'XXL')
 selected_sizes = tk.StringVar()
 
-
 def proceed_clicked():
+
     global prevImg
     _, frame = cap.read()
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
     prevImg = Image.fromarray(cv2image)
     ImageTk.PhotoImage(image=prevImg)
     if (len(sys.argv) < 2):
-        filepath = "Result.jpg"
+        filepath = "result.jpg"
     else:
         filepath = sys.argv[1]
 
@@ -94,13 +94,12 @@ def proceed_clicked():
     print(pomIDs)
     
 
-    imageToBeInspected = 'calresult\\imageCap.jpg'    #acting as camera
+    imageToBeInspected = '7M71906M.jpg'    #acting as camera
     # pomID = '7M71906MFRONTLENGTHFROMHPS'   # change later for stylenum while loop
     
     for poms in pomIDs[1:]:
 
         try:
-            
             cell = SamplePOMSheet.find(poms)
             cell2 = styleDtlSheet.find(poms)
             
@@ -115,9 +114,12 @@ def proceed_clicked():
             styleName = SamplePOMSheet.cell(pomID1,3).value
             output1 = 'subImages\\'+styleName+'\subImg1\\'+pomUID+'.JPG'
             output2 = 'subImages\\'+styleName+'\subImg2\\'+pomUID+'.JPG'
+            # output1 = 'subImages\\'+styleName+'\subImg1\\sub1.jpg'
+            # output2 = 'subImages\\'+styleName+'\subImg2\\sub2.jpg'
+
             print(pomOffset)
             pomIndex = 0
-            pixelToInch = 16 #camera height - 39 inches to 40
+            pixelToInch = float(styleDtlSheet.cell(2,9).value) #camera height - 39 inches to 40
             resultD = []
 
             # for pom in poms:
@@ -158,8 +160,10 @@ def proceed_clicked():
             subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
             
             subImg2pom = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
+
+            orientt = int(SamplePOMSheet.cell(pomID1,23).value)
             
-            resultD.append((subImg2pom[1]+subImg1pom[1])/pixelToInch)
+            resultD.append((subImg2pom[orientt]+subImg1pom[orientt])/pixelToInch)
 
             # Return True
             print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
@@ -169,7 +173,7 @@ def proceed_clicked():
             window.update_idletasks()
             cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
             cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
-            time.sleep(2.3)
+            time.sleep(2.6)
         
         except NameError as e:
             print(e)
@@ -237,59 +241,17 @@ view_entry['values'] = views
 view_entry['state'] = 'readonly'  # normal
 view_entry.pack(fill='x', expand=False)
 
-#camera scrollbar
-camscr_label = ttk.Label(window, text="Camera Zoom:")
-camscr_label.pack(fill='x', expand=False)
-
-camscr_entry = ttk.Scale(window,command = "")
-camscr_entry.pack(fill='x', expand=False)
-
-#camera Positive X
-camX_label = ttk.Label(window, text="MoveLeft:")
-camX_label.pack(fill='x', expand=False)
-
-camX_entry = ttk.Scale(window,command = "")
-camX_entry.pack(fill='x', expand=False)
-
-#camera Positive X
-camXX_label = ttk.Label(window, text="MoveRight:")
-camXX_label.pack(fill='x', expand=False)
-
-camXX_entry = ttk.Scale(window,command = "")
-camXX_entry.pack(fill='x', expand=False)
-
-#camera Positive X
-camY_label = ttk.Label(window, text="MoveUp:")
-camY_label.pack(fill='x', expand=False)
-
-camY_entry = ttk.Scale(window,command = "")
-camY_entry.pack(fill='x', expand=False)
-
-#camera Positive X
-camYY_label = ttk.Label(window, text="MoveDown:")
-camYY_label.pack(fill='x', expand=False)
-
-camYY_entry = ttk.Scale(window,command = "")
-camYY_entry.pack(fill='x', expand=False)
-
 # login button
-proceed_button = ttk.Button(window, text="Get POM", command=proceed_clicked)
+proceed_button = ttk.Button(window, text="Detect", command=proceed_clicked)
 proceed_button.pack(fill='x', expand=False)
 
-# login button
-templCap_button = ttk.Button(window, text="Capture Templates", command="")
-templCap_button.pack(fill='x', expand=False)
-
-# login button
-clear_button = ttk.Button(window, text="Clear", command=clear_clicked)
+# reset button
+clear_button = ttk.Button(window, text="Reset", command=clear_clicked)
 clear_button.pack(fill='x', expand=False)
-
 
 text = StringVar()
 
 taskLabel = Label(window,textvariable=text).pack(fill='x', expand=False)
-
-
 
 show_frame()  #Display 2
 window.mainloop()  #Starts GUI
