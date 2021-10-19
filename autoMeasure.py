@@ -16,6 +16,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 import time
 import pyautogui
 import random
+from tkinter.scrolledtext import ScrolledText
+import io, hashlib, queue, sys, time, threading, traceback
+import code
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
@@ -28,7 +31,6 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key("1Pfn_Dx_hEWGChU74iamO3BM4giSL7MpbuepGVo6_Bpk")  
 styleDtlSheet = sheet.worksheet("code")
 SamplePOMSheet = sheet.worksheet("RAWDATA")
-
 
 #Set up GUI
 window = tk.Tk()  #Makes main window
@@ -173,7 +175,7 @@ def proceed_clicked():
             window.update_idletasks()
             cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
             cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
-            time.sleep(2.6)
+            time.sleep(5)
         
         except NameError as e:
             print(e)
@@ -213,7 +215,9 @@ def clear_clicked():
     stylenum.set("")
     selected_sizes.set("")
     selected_view.set("")
-    text.set("")    
+    text.set("")
+    
+        
     
 # stylenums
 stylenum_label = ttk.Label(window, text="Style Number:")
