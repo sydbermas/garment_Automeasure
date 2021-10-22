@@ -96,7 +96,7 @@ def proceed_clicked():
     print(pomIDs)
     
 
-    imageToBeInspected = '7M71906M.jpg'    #acting as camera
+    imageToBeInspected = '7M71906XL.jpg'    #acting as camera
     # pomID = '7M71906MFRONTLENGTHFROMHPS'   # change later for stylenum while loop
     
     for poms in pomIDs[1:]:
@@ -111,7 +111,8 @@ def proceed_clicked():
             offsetY = int(SamplePOMSheet.cell(pomID1,15).value)
             offsetX2 = int(SamplePOMSheet.cell(pomID1,16).value)
             offsetY2 = int(SamplePOMSheet.cell(pomID1,17).value)
-            pomOffset = [[offsetX,offsetY,offsetX2,offsetY2]]
+            pomOffset = [[0,0,0,0]]
+            pomOffset2 = [[offsetX,offsetY,offsetX2,offsetY2]]  
             pomUID = SamplePOMSheet.cell(pomID1,2).value
             styleName = SamplePOMSheet.cell(pomID1,3).value
             output1 = 'subImages\\'+styleName+'\subImg1\\'+pomUID+'.JPG'
@@ -119,10 +120,11 @@ def proceed_clicked():
             # output1 = 'subImages\\'+styleName+'\subImg1\\sub1.jpg'
             # output2 = 'subImages\\'+styleName+'\subImg2\\sub2.jpg'
 
-            print(pomOffset)
+            # print(pomOffset)
             pomIndex = 0
             pixelToInch = float(styleDtlSheet.cell(2,9).value) #camera height - 39 inches to 40
             resultD = []
+            resultD2 = []
 
             # for pom in poms:
 
@@ -155,27 +157,39 @@ def proceed_clicked():
             else:
                 top_left = max_loc
                 top_left2 = max_loc2
-                print (top_left)
-                print (top_left2)
+                
+                # print (top_left)
+                # print (top_left2)
                 styleDtlSheet.update_cell(offSetID, 8, (str(top_left)+','+str(top_left2)))
 
             subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
             
             subImg2pom = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
 
+
+            subImg1pom2 = (top_left[0] + pomOffset2[pomIndex][0], top_left[1] + pomOffset2[pomIndex][1])
+            
+            subImg2pom2 = (top_left2[0] + pomOffset2[pomIndex][2], top_left2[1] + pomOffset2[pomIndex][3])
+
             orientt = int(SamplePOMSheet.cell(pomID1,23).value)
             
             resultD.append((subImg2pom[orientt]+subImg1pom[orientt])/pixelToInch)
-
+            
             # Return True
-            print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
-            SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
+            # print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom endd
+            SamplePOMSheet.update_cell(pomID1, 24 , (round(resultD[pomIndex],2)))
+
+            resultD2.append((subImg2pom2[orientt]+subImg1pom2[orientt])/pixelToInch)  #Second Output
+            
+            # Return True
+            print(pomUID+":",round(resultD2[pomIndex],2),"inches") # pom end
+            SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD2[pomIndex],2)))
             
             text.set(str(styleDtlSheet.cell(2,6).value)+"/"+str(styleDtlSheet.cell(2,3).value))
             window.update_idletasks()
-            cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
-            cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
-            time.sleep(5)
+            # cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
+            # cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
+            time.sleep(8)
         
         except NameError as e:
             print(e)
@@ -183,19 +197,23 @@ def proceed_clicked():
     result = int(styleDtlSheet.cell(2,6).value)
     total = int(styleDtlSheet.cell(2,3).value)
     if result == total :
-            # plt.subplot(121),plt.imshow(res,cmap = 'gray')
-        # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-        plt.subplot(121),plt.imshow(img,cmap = 'gray')
-        plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-        plt.suptitle(meth)
-        mng = plt.get_current_fig_manager()
-        mng.window.state("zoomed")
-        plt.show()
+        #     # plt.subplot(121),plt.imshow(res,cmap = 'gray')
+        # # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+        # plt.subplot(121),plt.imshow(img,cmap = 'gray')
+        # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+        # plt.suptitle(meth)
+        # mng = plt.get_current_fig_manager()
+        # mng.window.state("zoomed")
+        # plt.show()
+        showinfo(
+            title='Information',
+            message="Detection Done!"
+        )
         pomIndex +=1    #pomindex a to b
     else:
         showinfo(
             title='Information',
-            message="Not completed!"
+            message="Not yet complete! Please detect other parts."
         )
     
 def clear_clicked():
@@ -216,9 +234,7 @@ def clear_clicked():
     selected_sizes.set("")
     selected_view.set("")
     text.set("")
-    
         
-    
 # stylenums
 stylenum_label = ttk.Label(window, text="Style Number:")
 stylenum_label.pack(fill='x', expand=False)
@@ -255,7 +271,7 @@ clear_button.pack(fill='x', expand=False)
 
 text = StringVar()
 
-taskLabel = Label(window,textvariable=text).pack(fill='x', expand=False)
+taskLabel = Label(window,textvariable=text).pack(fill='x', expand=False)    
 
 show_frame()  #Display 2
 window.mainloop()  #Starts GUI
