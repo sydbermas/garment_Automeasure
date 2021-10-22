@@ -95,7 +95,6 @@ def proceed_clicked():
     pomIDs = styleDtlSheet.col_values(5)
     print(pomIDs)
     
-
     imageToBeInspected = '7M71906XL.jpg'    #acting as camera
     # pomID = '7M71906MFRONTLENGTHFROMHPS'   # change later for stylenum while loop
     
