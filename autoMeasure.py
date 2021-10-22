@@ -116,8 +116,6 @@ def proceed_clicked():
             styleName = SamplePOMSheet.cell(pomID1,3).value
             output1 = 'subImages\\'+styleName+'\subImg1\\'+pomUID+'.JPG'
             output2 = 'subImages\\'+styleName+'\subImg2\\'+pomUID+'.JPG'
-            # output1 = 'subImages\\'+styleName+'\subImg1\\sub1.jpg'
-            # output2 = 'subImages\\'+styleName+'\subImg2\\sub2.jpg'
 
             # print(pomOffset)
             pomIndex = 0
@@ -144,6 +142,9 @@ def proceed_clicked():
             # Apply template Matchingpip i
             res = cv.matchTemplate(img,templAB,methodAB)
             res2 = cv.matchTemplate(img,templBA,methodAB)
+            # rechecking template
+            res = cv.matchTemplate(img,templAB,methodAB)
+            res2 = cv.matchTemplate(img,templBA,methodAB)
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
             min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
             
@@ -157,15 +158,16 @@ def proceed_clicked():
                 top_left = max_loc
                 top_left2 = max_loc2
                 
-                # print (top_left)
-                # print (top_left2)
-                styleDtlSheet.update_cell(offSetID, 8, (str(top_left)+','+str(top_left2)))
+                print (top_left,top_left)
+                # styleDtlSheet.update_cell(offSetID, 8, (str(top_left)+','+str(top_left2)))
 
+
+            #python output
             subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
             
             subImg2pom = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
 
-
+            #google sheet output
             subImg1pom2 = (top_left[0] + pomOffset2[pomIndex][0], top_left[1] + pomOffset2[pomIndex][1])
             
             subImg2pom2 = (top_left2[0] + pomOffset2[pomIndex][2], top_left2[1] + pomOffset2[pomIndex][3])
@@ -212,7 +214,7 @@ def proceed_clicked():
     else:
         showinfo(
             title='Information',
-            message="Not yet complete! Please detect other parts."
+            message="Not yet complete! Please detect other poms."
         )
     
 def clear_clicked():
@@ -260,7 +262,7 @@ view_entry['values'] = views
 view_entry['state'] = 'readonly'  # normal
 view_entry.pack(fill='x', expand=False)
 
-# login button
+# detect button
 proceed_button = ttk.Button(window, text="Detect", command=proceed_clicked)
 proceed_button.pack(fill='x', expand=False)
 
