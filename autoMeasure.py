@@ -1,6 +1,8 @@
 from os import name, system
+import os
 import sys
 from tkinter.constants import HORIZONTAL, LEFT, RIGHT
+from types import FrameType
 from matplotlib import pyplot as plt
 import numpy as np
 import cv2 as cv
@@ -11,6 +13,7 @@ from tkinter import Label, StringVar, ttk
 from tkinter.messagebox import showinfo
 import gspread
 from numpy import empty
+from numpy.typing import _16Bit
 from oauth2client.client import Error
 from oauth2client.service_account import ServiceAccountCredentials
 import time
@@ -19,6 +22,7 @@ import random
 from tkinter.scrolledtext import ScrolledText
 import io, hashlib, queue, sys, time, threading, traceback
 import code
+import math
 
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
@@ -41,16 +45,21 @@ window.config(background="#404040")
 imageFrame = tk.Frame(window, width=600, height=500)
 imageFrame.pack(side=LEFT, expand=False)
 
+
 #Capture video frames
 lmain = tk.Label(imageFrame)
 lmain.pack(side=LEFT, expand=False) 
 cap = cv.VideoCapture(int(styleDtlSheet.cell(2,7).value),cv.CAP_DSHOW)
+
+
 def show_frame():
     _, frame = cap.read()
-    frame = cv.flip(frame, 1)
+    # frame = cv.flip(frame, 1)
+    cv.rectangle(frame, (80, 0), (560, 479), (0, 255, 0), 1, 0)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
+    
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame) 
@@ -92,26 +101,20 @@ def proceed_clicked():
         title='Information',
         message=msg
     )
-    pomIDs = styleDtlSheet.col_values(5)
-    print(pomIDs)
+    pomIDs = styleDtlSheet.col_values(5)    
     
-    imageToBeInspected = '7M71906XL.jpg'    #acting as camera
-    # pomID = '7M71906MFRONTLENGTHFROMHPS'   # change later for stylenum while loop
+    imageToBeInspected = '7M71906M.jpg'    #acting as camera
     
     for poms in pomIDs[1:]:
-
+        
         try:
+            
             cell = SamplePOMSheet.find(poms)
             cell2 = styleDtlSheet.find(poms)
-            
+
             pomID1 = (cell.row)
-            offSetID = (cell2.row)
-            offsetX = int(SamplePOMSheet.cell(pomID1,14).value)
-            offsetY = int(SamplePOMSheet.cell(pomID1,15).value)
-            offsetX2 = int(SamplePOMSheet.cell(pomID1,16).value)
-            offsetY2 = int(SamplePOMSheet.cell(pomID1,17).value)
-            pomOffset = [[0,0,0,0]]
-            pomOffset2 = [[offsetX,offsetY,offsetX2,offsetY2]]  
+
+            pomOffset = [[0,0,0,0]]  
             pomUID = SamplePOMSheet.cell(pomID1,2).value
             styleName = SamplePOMSheet.cell(pomID1,3).value
             output1 = 'subImages\\'+styleName+'\subImg1\\'+pomUID+'.JPG'
@@ -119,9 +122,8 @@ def proceed_clicked():
 
             # print(pomOffset)
             pomIndex = 0
-            pixelToInch = float(styleDtlSheet.cell(2,9).value) #camera height - 39 inches to 40
+    
             resultD = []
-            resultD2 = []
 
             # for pom in poms:
 
@@ -142,9 +144,6 @@ def proceed_clicked():
             # Apply template Matchingpip i
             res = cv.matchTemplate(img,templAB,methodAB)
             res2 = cv.matchTemplate(img,templBA,methodAB)
-            # rechecking template
-            res = cv.matchTemplate(img,templAB,methodAB)
-            res2 = cv.matchTemplate(img,templBA,methodAB)
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
             min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
             
@@ -153,70 +152,56 @@ def proceed_clicked():
             if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
                 top_left = min_loc
                 top_left2 = min_loc2
-                
+
             else:
                 top_left = max_loc
                 top_left2 = max_loc2
-                
-                print (top_left,top_left)
-                # styleDtlSheet.update_cell(offSetID, 8, (str(top_left)+','+str(top_left2)))
-
-
+   
             #python output
             subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
-            
+
             subImg2pom = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
 
-            #google sheet output
-            subImg1pom2 = (top_left[0] + pomOffset2[pomIndex][0], top_left[1] + pomOffset2[pomIndex][1])
+            resultD.append((math.sqrt((top_left2[0] - top_left[0])**2 + (top_left2[1] -top_left[1])**2))/14.9)
             
-            subImg2pom2 = (top_left2[0] + pomOffset2[pomIndex][2], top_left2[1] + pomOffset2[pomIndex][3])
 
-            orientt = int(SamplePOMSheet.cell(pomID1,23).value)
-            
-            resultD.append((subImg2pom[orientt]+subImg1pom[orientt])/pixelToInch)
-            
             # Return True
-            # print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom endd
-            SamplePOMSheet.update_cell(pomID1, 24 , (round(resultD[pomIndex],2)))
-
-            resultD2.append((subImg2pom2[orientt]+subImg1pom2[orientt])/pixelToInch)  #Second Output
+            print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
+            SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
             
-            # Return True
-            print(pomUID+":",round(resultD2[pomIndex],2),"inches") # pom end
-            SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD2[pomIndex],2)))
-            
-            text.set(str(styleDtlSheet.cell(2,6).value)+"/"+str(styleDtlSheet.cell(2,3).value))
-            window.update_idletasks()
-            # cv.rectangle(img,subImg1pom, subImg2pom, 255, 2)    
-            # cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,250])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (36,255,12), 2, -1, )
-            time.sleep(8)
-        
+            # text.set(poms)
+            # window.update_idletasks()
+            cv.line(img,subImg1pom, subImg2pom, 255, 1)    
+            cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
+            cv.imwrite('Output\\'+str(pomUID)+'.jpg', img)
+            time.sleep(8) 
+            # pomIndex +=1
         except NameError as e:
             print(e)
-            
+        
     result = int(styleDtlSheet.cell(2,6).value)
     total = int(styleDtlSheet.cell(2,3).value)
     if result == total :
-        #     # plt.subplot(121),plt.imshow(res,cmap = 'gray')
-        # # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+        
+        showinfo(
+            title='Information',
+            message="Detection Done!"
+        )
+    else:
+        # plt.subplot(121),plt.imshow(res,cmap = 'gray')
+    # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+                #pomindex a to b
         # plt.subplot(121),plt.imshow(img,cmap = 'gray')
         # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
         # plt.suptitle(meth)
         # mng = plt.get_current_fig_manager()
         # mng.window.state("zoomed")
-        # plt.show()
-        showinfo(
-            title='Information',
-            message="Detection Done!"
-        )
-        pomIndex +=1    #pomindex a to b
-    else:
+        # plt.show()  
         showinfo(
             title='Information',
             message="Not yet complete! Please detect other poms."
         )
-    
+
 def clear_clicked():
     
     """ callback when the button clicked
@@ -234,8 +219,8 @@ def clear_clicked():
     stylenum.set("")
     selected_sizes.set("")
     selected_view.set("")
-    text.set("")
-        
+    # text.set("")
+
 # stylenums
 stylenum_label = ttk.Label(window, text="Style Number:")
 stylenum_label.pack(fill='x', expand=False)
@@ -269,10 +254,6 @@ proceed_button.pack(fill='x', expand=False)
 # reset button
 clear_button = ttk.Button(window, text="Reset", command=clear_clicked)
 clear_button.pack(fill='x', expand=False)
-
-text = StringVar()
-
-taskLabel = Label(window,textvariable=text).pack(fill='x', expand=False)    
 
 show_frame()  #Display 2
 window.mainloop()  #Starts GUI
