@@ -1,5 +1,4 @@
 from os import name, system
-import os
 import sys
 from tkinter.constants import HORIZONTAL, LEFT, RIGHT
 from types import FrameType
@@ -9,7 +8,7 @@ import cv2 as cv
 import tkinter as tk
 from PIL import Image, ImageTk
 import tkinter as tk
-from tkinter import Label, StringVar, ttk
+from tkinter import ttk
 from tkinter.messagebox import showinfo
 import gspread
 from numpy import empty
@@ -17,13 +16,8 @@ from numpy.typing import _16Bit
 from oauth2client.client import Error
 from oauth2client.service_account import ServiceAccountCredentials
 import time
-import pyautogui
-import random
-from tkinter.scrolledtext import ScrolledText
-import io, hashlib, queue, sys, time, threading, traceback
-import code
+import sys, time
 import math
-
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
         "https://www.googleapis.com/auth/drive.file",
@@ -45,12 +39,10 @@ window.config(background="#404040")
 imageFrame = tk.Frame(window, width=600, height=500)
 imageFrame.pack(side=LEFT, expand=False)
 
-
 #Capture video frames
 lmain = tk.Label(imageFrame)
 lmain.pack(side=LEFT, expand=False) 
 cap = cv.VideoCapture(int(styleDtlSheet.cell(2,7).value),cv.CAP_DSHOW)
-
 
 def show_frame():
     _, frame = cap.read()
@@ -102,15 +94,17 @@ def proceed_clicked():
         message=msg
     )
     pomIDs = styleDtlSheet.col_values(5)    
+    tps = int(styleDtlSheet.cell(2,4).value)
+    imageToBeInspected = '7M71906XL.jpg'    #acting as camera
     
-    imageToBeInspected = '7M71906M.jpg'    #acting as camera
-    
+    final_output = []
+    final_id = []
     for poms in pomIDs[1:]:
         
         try:
             
             cell = SamplePOMSheet.find(poms)
-            cell2 = styleDtlSheet.find(poms)
+            #cell2 = styleDtlSheet.find(poms)
 
             pomID1 = (cell.row)
 
@@ -124,8 +118,6 @@ def proceed_clicked():
             pomIndex = 0
     
             resultD = []
-
-            # for pom in poms:
 
             img = cv.imread(imageToBeInspected,0)
             
@@ -164,21 +156,38 @@ def proceed_clicked():
 
             resultD.append((math.sqrt((top_left2[0] - top_left[0])**2 + (top_left2[1] -top_left[1])**2))/14.9)
             
-
             # Return True
             print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
-            SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
+                #SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
+            #push to finalOutput
+            final_id.append(pomUID)
+            final_output.append(round(resultD[pomIndex],2))
+
             
             # text.set(poms)
             # window.update_idletasks()
             cv.line(img,subImg1pom, subImg2pom, 255, 1)    
             cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
             cv.imwrite('Output\\'+str(pomUID)+'.jpg', img)
-            time.sleep(8) 
             # pomIndex +=1
         except NameError as e:
             print(e)
         
+
+    #Batch Update IDs
+    cell_list = SamplePOMSheet.range("L2:L"+ str(len(final_id)+1))
+    for xx, val in enumerate(final_id):
+        cell_list[xx].value = val
+    styleDtlSheet.update_cells(cell_list)
+
+
+    #Batch Update results
+    cell_list = SamplePOMSheet.range("M2:M"+ str(len(final_output)+1))
+    for xx, val2 in enumerate(final_output):
+        cell_list[xx].value = val2
+    styleDtlSheet.update_cells(cell_list)        
+
+
     result = int(styleDtlSheet.cell(2,6).value)
     total = int(styleDtlSheet.cell(2,3).value)
     if result == total :
@@ -201,6 +210,7 @@ def proceed_clicked():
             title='Information',
             message="Not yet complete! Please detect other poms."
         )
+ # process data_inputs iterable with pool
 
 def clear_clicked():
     
