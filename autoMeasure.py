@@ -44,6 +44,7 @@ lmain = tk.Label(imageFrame)
 lmain.pack(side=LEFT, expand=False) 
 cap = cv.VideoCapture(int(styleDtlSheet.cell(2,7).value),cv.CAP_DSHOW)
 
+#Camera frame
 def show_frame():
     _, frame = cap.read()
     # frame = cv.flip(frame, 1)
@@ -56,19 +57,19 @@ def show_frame():
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame) 
 
-# store email address and password
+# store style details
 stylenum = tk.StringVar()
 sizeset = tk.StringVar()
 view = tk.StringVar()
-
 views = ('Front', 'Back', 'Other')
 selected_view = tk.StringVar()
-
 sizes = ('XS', 'S', 'M','L', 'XL', 'XXL')
 selected_sizes = tk.StringVar()
 
+#Lauch detection on style
 def proceed_clicked():
 
+    # camera frame on tkinter gui
     global prevImg
     _, frame = cap.read()
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -78,120 +79,125 @@ def proceed_clicked():
         filepath = "result.jpg"
     else:
         filepath = sys.argv[1]
-
+    #save captured frame as image
     print ("Output file to: " + filepath)
     prevImg.save(filepath)
 
     """ callback when the button clicked
     """
+    # post tkinter gui text boxes into google sheet code tab
     msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}. Please wait for the result'
     styleDtlSheet.update('B2', stylenum.get())
     styleDtlSheet.update('B3', sizeset_entry.get())
     styleDtlSheet.update('B4', view_entry.get())
-    
+    #message box of gui details
     showinfo(
         title='Information',
         message=msg
     )
+
+    # get pomiDs selected from 1 style
     pomIDs = styleDtlSheet.col_values(5)    
     tps = int(styleDtlSheet.cell(2,4).value)
     imageToBeInspected = '7M71906M.jpg'    #acting as camera
     
+    #google sheet output on code as writer and store
     final_output = []
     final_id = []
-    for poms in pomIDs[1:]:
+
+    #slice list into half
+    # pomID_1 = len(pomIDs)
+    # midpomID_2 = pomID_1//2
+    # template matching from style details and images
+    for i in pomIDs[1:]:
         
         try:
             
-            cell = SamplePOMSheet.find(poms)
+            cell_i = SamplePOMSheet.find(i)
             #cell2 = styleDtlSheet.find(poms)
 
-            pomID1 = (cell.row)
+            pomID_i = (cell_i.row)
 
             pomOffset = [[0,0,0,0]]  
-            pomUID = SamplePOMSheet.cell(pomID1,2).value
-            styleName = SamplePOMSheet.cell(pomID1,3).value
-            output1 = 'subImages\\'+styleName+'\subImg1\\'+pomUID+'.JPG'
-            output2 = 'subImages\\'+styleName+'\subImg2\\'+pomUID+'.JPG'
+            pomUID_i = SamplePOMSheet.cell(pomID_i,2).value
+            styleName_i = SamplePOMSheet.cell(pomID_i,3).value
+            output_i = 'subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'
+            output_ii = 'subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'
 
             # print(pomOffset)
-            pomIndex = 0
+            pomIndex_i = 0
     
-            resultD = []
+            result_i = []
 
-            img = cv.imread(imageToBeInspected,0)
+            img_i = cv.imread(imageToBeInspected,0)
             
-            img2 = img.copy()
+            img2_i = img_i.copy()
             
-            templAB = cv.imread(output1,0) 
-            templBA = cv.imread(output2,0)
-            w, h = templAB.shape[::-1]
-            w2, h2 = templBA.shape[::-1]
+            templ_i = cv.imread(output_i,0) 
+            templ_ii = cv.imread(output_ii,0)
+            w, h = templ_i.shape[::-1]
+            w2, h2 = templ_ii.shape[::-1]
             # All the 6 methods for comparison in a list
-            methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+            methods_i = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
                     'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
-            meth = methods[1] # Mehtod setting
-            img = img2.copy()
-            methodAB = eval(meth)
+            meth_i = methods_i[1] # Mehtod setting
+            img_i = img2_i.copy()
+            method_i = eval(meth_i)
             # Apply template Matchingpip i
-            res = cv.matchTemplate(img,templAB,methodAB)
-            res2 = cv.matchTemplate(img,templBA,methodAB)
-            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
-            min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2)
+            res_i = cv.matchTemplate(img_i,templ_i,method_i)
+            res2_i = cv.matchTemplate(img_i,templ_ii,method_i)
+            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res_i)
+            min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2_i)
             
             # print(min_loc, max_loc, min_loc2, max_loc2)
             # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
-            if methodAB in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
-                top_left = min_loc
-                top_left2 = min_loc2
+            if method_i in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
+                top_left_i = min_loc
+                top_left_ii = min_loc2
 
             else:
-                top_left = max_loc
-                top_left2 = max_loc2
+                top_left_i = max_loc
+                top_left_ii = max_loc2
    
-            #python output
-            subImg1pom = (top_left[0] + pomOffset[pomIndex][0], top_left[1] + pomOffset[pomIndex][1])
+            #python subImages topleft 
+            subImgpom_i = (top_left_i[0] + pomOffset[pomIndex_i][0], top_left_i[1] + pomOffset[pomIndex_i][1])
 
-            subImg2pom = (top_left2[0] + pomOffset[pomIndex][2], top_left2[1] + pomOffset[pomIndex][3])
+            subImgpom_ii = (top_left_ii[0] + pomOffset[pomIndex_i][2], top_left_ii[1] + pomOffset[pomIndex_i][3])
 
-            resultD.append((math.sqrt((top_left2[0] - top_left[0])**2 + (top_left2[1] -top_left[1])**2))/14.9)
+            #result calculation from distances of 2 subImages according from height of camera
+            result_i.append((math.sqrt((top_left_ii[0] - top_left_i[0])**2 + (top_left_ii[1] -top_left_i[1])**2))/14.9)
             
-            # Return True
-            print(pomUID+":",round(resultD[pomIndex],2),"inches") # pom end
+            print(pomUID_i+":",round(result_i[pomIndex_i],2),"inches") # pom end
                 #SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
             #push to finalOutput
-            final_id.append(pomUID)
-            final_output.append(round(resultD[pomIndex],2))
+            final_id.append(pomUID_i)
+            final_output.append(round(result_i[pomIndex_i],2))
 
-            
-            # text.set(poms)
-            # window.update_idletasks()
-            cv.line(img,subImg1pom, subImg2pom, 255, 1)    
-            cv.putText(img, str(round(resultD[pomIndex],2)) , (np.add(subImg2pom,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
-            cv.imwrite('Output\\'+str(pomUID)+'.jpg', img)
+            cv.line(img_i,subImgpom_i, subImgpom_ii, 255, 1)    
+            cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
+            cv.imwrite('Output\\'+str(pomUID_i)+'.jpg', img_i)
             # pomIndex +=1
         except NameError as e:
             print(e)
 
-    #Batch Update IDs
-    cell_list = SamplePOMSheet.range("L2:L"+ str(len(final_id)+1))
-    for xx, val in enumerate(final_id):
-        cell_list[xx].value = val
-    styleDtlSheet.update_cells(cell_list)
+    #Batch Update
+    poms = SamplePOMSheet.get_values("A2:U")
+    idss = styleDtlSheet.get_values("E2:E")
+
+    print("start")
+    for id in range(len(idss)):
+        for ig in range(len(poms)):
+            if(idss[id][0] == poms[ig][1]):
+                print("inside : ",poms[ig])
+                break
 
 
-    #Batch Update results
-    cell_list = SamplePOMSheet.range("M2:M"+ str(len(final_output)+1))
-    for xx, val2 in enumerate(final_output):
-        cell_list[xx].value = val2
-    styleDtlSheet.update_cells(cell_list)    
 
 
     result = int(styleDtlSheet.cell(2,6).value)
     total = int(styleDtlSheet.cell(2,3).value)
     if result == total :
-        
-        
+
         showinfo(
             title='Information',
             message="Detection Done!"
@@ -210,7 +216,6 @@ def proceed_clicked():
             title='Information',
             message="Not yet complete! Please detect other poms."
         )
- # process data_inputs iterable with pool
 
 def clear_clicked():
     
@@ -218,7 +223,6 @@ def clear_clicked():
     """
     msg = f'You clear all data results!'
     # SamplePOMSheet.clear('R2:R', "")
-
     # sheet.values_clear("RAWDATA!R2:R10000")
     sheet.values_clear("code!H2:H10000")
     sheet.values_clear("code!L2:L10000")
