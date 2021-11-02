@@ -95,7 +95,7 @@ def proceed_clicked():
     )
     pomIDs = styleDtlSheet.col_values(5)    
     tps = int(styleDtlSheet.cell(2,4).value)
-    imageToBeInspected = '7M71906XL.jpg'    #acting as camera
+    imageToBeInspected = '7M71906M.jpg'    #acting as camera
     
     final_output = []
     final_id = []
@@ -172,7 +172,6 @@ def proceed_clicked():
             # pomIndex +=1
         except NameError as e:
             print(e)
-        
 
     #Batch Update IDs
     cell_list = SamplePOMSheet.range("L2:L"+ str(len(final_id)+1))
@@ -185,12 +184,13 @@ def proceed_clicked():
     cell_list = SamplePOMSheet.range("M2:M"+ str(len(final_output)+1))
     for xx, val2 in enumerate(final_output):
         cell_list[xx].value = val2
-    styleDtlSheet.update_cells(cell_list)        
+    styleDtlSheet.update_cells(cell_list)    
 
 
     result = int(styleDtlSheet.cell(2,6).value)
     total = int(styleDtlSheet.cell(2,3).value)
     if result == total :
+        
         
         showinfo(
             title='Information',
@@ -219,8 +219,10 @@ def clear_clicked():
     msg = f'You clear all data results!'
     # SamplePOMSheet.clear('R2:R', "")
 
-    sheet.values_clear("RAWDATA!R2:R10000")
+    # sheet.values_clear("RAWDATA!R2:R10000")
     sheet.values_clear("code!H2:H10000")
+    sheet.values_clear("code!L2:L10000")
+    sheet.values_clear("code!M2:M10000")
 
     showinfo(
         title='Information',
