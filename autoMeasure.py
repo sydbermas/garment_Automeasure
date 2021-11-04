@@ -86,15 +86,15 @@ def proceed_clicked():
     """ callback when the button clicked
     """
     # post tkinter gui text boxes into google sheet code tab
-    msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}. Please wait for the result'
+    # msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}. Please wait for the result'
     styleDtlSheet.update('B2', stylenum.get())
     styleDtlSheet.update('B3', sizeset_entry.get())
     styleDtlSheet.update('B4', view_entry.get())
     #message box of gui details
-    showinfo(
-        title='Information',
-        message=msg
-    )
+    # showinfo(
+    #     title='Information',
+    #     message=msg
+    # )
 
     # get pomiDs selected from 1 style
     pomIDs = styleDtlSheet.col_values(5)    
@@ -191,27 +191,16 @@ def proceed_clicked():
                 print("inside : ",poms[ig])
                 break
 
-
-
-
-    result = int(styleDtlSheet.cell(2,6).value)
-    total = int(styleDtlSheet.cell(2,3).value)
+    result = len(final_output)
+    total = len(pomIDs)
     if result == total :
 
         showinfo(
             title='Information',
-            message="Detection Done!"
+            message="Detection Done! Please detect other poms according to your finding."
         )
     else:
-        # plt.subplot(121),plt.imshow(res,cmap = 'gray')
-    # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-                #pomindex a to b
-        # plt.subplot(121),plt.imshow(img,cmap = 'gray')
-        # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-        # plt.suptitle(meth)
-        # mng = plt.get_current_fig_manager()
-        # mng.window.state("zoomed")
-        # plt.show()  
+
         showinfo(
             title='Information',
             message="Not yet complete! Please detect other poms."
