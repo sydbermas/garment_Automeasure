@@ -176,44 +176,59 @@ def proceed_clicked():
             cv.line(img_i,subImgpom_i, subImgpom_ii, 255, 1)    
             cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
             cv.imwrite('Output\\'+str(pomUID_i)+'.jpg', img_i)
-            # pomIndex +=1
+        
+           # pomIndex +=1
         except NameError as e:
             print(e)
+    
+    #Clear Batch Update History
+    sheet.values_clear("code!L2:L10000")
+    sheet.values_clear("code!M2:M10000")            
+
+    #Batch Update IDs
+    cell_list = styleDtlSheet.range("L2:L"+ str(len(final_id)+1))
+    for xx, val in enumerate(final_id):
+        cell_list[xx].value = val
+    styleDtlSheet.update_cells(cell_list)
+
+
+    #Batch Update results
+    cell_list = styleDtlSheet.range("M2:M"+ str(len(final_output)+1))
+    for xx, val2 in enumerate(final_output):
+        cell_list[xx].value = val2
+    styleDtlSheet.update_cells(cell_list) 
 
     #Batch Update
     poms = SamplePOMSheet.get_values("A2:U")
-    idss = styleDtlSheet.get_values("E2:E")
+    idss = styleDtlSheet.get_values("L2:M")
 
     print("start")
     for id in range(len(idss)):
         for ig in range(len(poms)):
             if(idss[id][0] == poms[ig][1]):
-                print("inside : ",poms[ig])
+                print( poms[ig][17]," ", idss[id][1])
+                poms[ig][17] = idss[id][1]
                 break
+    
+    r_output = []
 
-    result = len(final_output)
-    total = len(pomIDs)
-    if result == total :
+    for ik in range(len(poms)):
+        r_output.append(poms[ik][17])
 
-        showinfo(
+    cell_lstA = SamplePOMSheet.range("R2:R" + str(len(r_output)+1))
+    for ih, val3 in enumerate(r_output):
+       cell_lstA[ih].value = str(val3).strip("'")
+    SamplePOMSheet.update_cells(cell_lstA)
+    showinfo(
             title='Information',
-            message="Detection Done! Please detect other poms according to your finding."
-        )
-    else:
+            message="Detection Done! Please detect other poms to complete your data.")
 
-        showinfo(
-            title='Information',
-            message="Not yet complete! Please detect other poms."
-        )
 
 def clear_clicked():
     
     """ callback when the button clicked
     """
-    msg = f'You clear all data results!'
-    # SamplePOMSheet.clear('R2:R', "")
-    # sheet.values_clear("RAWDATA!R2:R10000")
-    sheet.values_clear("code!H2:H10000")
+    msg = f'You clear all field results!'
     sheet.values_clear("code!L2:L10000")
     sheet.values_clear("code!M2:M10000")
 
