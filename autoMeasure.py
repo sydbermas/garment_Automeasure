@@ -18,6 +18,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import time
 import sys, time
 import math
+import itertools
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
         "https://www.googleapis.com/auth/drive.file",
@@ -52,7 +53,6 @@ def show_frame():
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
-    
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame) 
@@ -95,7 +95,6 @@ def proceed_clicked():
         title='Information',
         message=msg
     )
-
     # get pomiDs selected from 1 style
     pomIDs = styleDtlSheet.col_values(5)    
     tps = int(styleDtlSheet.cell(2,4).value)
@@ -109,45 +108,79 @@ def proceed_clicked():
     # pomID_1 = len(pomIDs)
     # midpomID_2 = pomID_1//2
     # template matching from style details and images
-    for i in pomIDs[1:]:
+    jpoms = []
+    ipoms = []
+    for i in pomIDs[1:(len(pomIDs)/2)]:
+        ipoms.append(i)
+        break
+
+    for j in pomIDs[(len(pomIDs)/2)]:
+        jpoms.append(j)
+        break
+
+    for i,j in itertools.product(ipoms,jpoms):
         
-        try:
+        try: 
             
             cell_i = SamplePOMSheet.find(i)
+            cell_j = SamplePOMSheet.find(j)
             #cell2 = styleDtlSheet.find(poms)
 
             pomID_i = (cell_i.row)
+            pomID_j = (cell_j.row)
 
             pomOffset = [[0,0,0,0]]  
             pomUID_i = SamplePOMSheet.cell(pomID_i,2).value
             styleName_i = SamplePOMSheet.cell(pomID_i,3).value
             output_i = 'subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'
             output_ii = 'subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'
+            # for j
+            pomUID_j = SamplePOMSheet.cell(pomID_j,2).value
+            styleName_j = SamplePOMSheet.cell(pomID_j,3).value
+            output_j = 'subImages\\'+styleName_j+'\subImg1\\'+pomUID_j+'.JPG'
+            output_jj = 'subImages\\'+styleName_j+'\subImg2\\'+pomUID_j+'.JPG'
 
             # print(pomOffset)
             pomIndex_i = 0
+            pomIndex_j = 0
     
             result_i = []
+            result_j = []
 
             img_i = cv.imread(imageToBeInspected,0)
+            img_j = cv.imread(imageToBeInspected,0)
             
             img2_i = img_i.copy()
+            img2_j = img_i.copy()
             
             templ_i = cv.imread(output_i,0) 
             templ_ii = cv.imread(output_ii,0)
+            templ_j = cv.imread(output_j,0) 
+            templ_jj = cv.imread(output_jj,0)
             w, h = templ_i.shape[::-1]
             w2, h2 = templ_ii.shape[::-1]
+            wj, hj = templ_j.shape[::-1]
+            w2j, h2j = templ_jj.shape[::-1]
             # All the 6 methods for comparison in a list
             methods_i = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
                     'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
+            methods_j = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+                    'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
             meth_i = methods_i[1] # Mehtod setting
+            meth_j = methods_j[1] # Mehtod setting
             img_i = img2_i.copy()
+            img_j = img2_j.copy()
             method_i = eval(meth_i)
+            method_j = eval(meth_j)
             # Apply template Matchingpip i
             res_i = cv.matchTemplate(img_i,templ_i,method_i)
             res2_i = cv.matchTemplate(img_i,templ_ii,method_i)
+            res_j = cv.matchTemplate(img_j,templ_j,method_j)
+            res2_j = cv.matchTemplate(img_j,templ_jj,method_j)
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res_i)
             min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2_i)
+            min_valj, max_valj, min_locj, max_locj = cv.minMaxLoc(res_j)
+            min_val2j, max_val2j, min_loc2j, max_loc2j = cv.minMaxLoc(res2_j)
             
             # print(min_loc, max_loc, min_loc2, max_loc2)
             # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
@@ -158,45 +191,87 @@ def proceed_clicked():
             else:
                 top_left_i = max_loc
                 top_left_ii = max_loc2
+            
+            if method_j in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
+                top_left_j = min_locj
+                top_left_jj = min_loc2j
+
+            else:
+                top_left_j = max_locj
+                top_left_jj = max_loc2j
    
             #python subImages topleft 
             subImgpom_i = (top_left_i[0] + pomOffset[pomIndex_i][0], top_left_i[1] + pomOffset[pomIndex_i][1])
+            subImgpom_j = (top_left_j[0] + pomOffset[pomIndex_j][0], top_left_j[1] + pomOffset[pomIndex_j][1])
 
             subImgpom_ii = (top_left_ii[0] + pomOffset[pomIndex_i][2], top_left_ii[1] + pomOffset[pomIndex_i][3])
+            subImgpom_jj = (top_left_jj[0] + pomOffset[pomIndex_j][2], top_left_jj[1] + pomOffset[pomIndex_j][3])
 
             #result calculation from distances of 2 subImages according from height of camera
             result_i.append((math.sqrt((top_left_ii[0] - top_left_i[0])**2 + (top_left_ii[1] -top_left_i[1])**2))/14.9)
+            result_j.append((math.sqrt((top_left_jj[0] - top_left_j[0])**2 + (top_left_jj[1] -top_left_j[1])**2))/14.9)
             
             print(pomUID_i+":",round(result_i[pomIndex_i],2),"inches") # pom end
+            print(pomUID_j+":",round(result_j[pomIndex_j],2),"inches") # pom end
                 #SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
             #push to finalOutput
             final_id.append(pomUID_i)
             final_output.append(round(result_i[pomIndex_i],2))
+            final_id.append(pomUID_j)
+            final_output.append(round(result_j[pomIndex_j],2))
 
-            cv.line(img_i,subImgpom_i, subImgpom_ii, 255, 1)    
+            cv.line(img_i,subImgpom_i, subImgpom_ii, 255, 1)
+            cv.line(img_j,subImgpom_j, subImgpom_jj, 255, 1)    
             cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
+            cv.putText(img_i, str(round(result_j[pomIndex_j],2)) , (np.add(subImgpom_jj,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
             cv.imwrite('Output\\'+str(pomUID_i)+'.jpg', img_i)
+            cv.imwrite('Output\\'+str(pomUID_j)+'.jpg', img_j)
+            
             # pomIndex +=1
         except NameError as e:
             print(e)
 
+    #Clear Batch Update History
+    sheet.values_clear("code!L2:L10000")
+    sheet.values_clear("code!M2:M10000")            
+
+    #Batch Update IDs
+    cell_list = styleDtlSheet.range("L2:L"+ str(len(final_id)+1))
+    for xx, val in enumerate(final_id):
+        cell_list[xx].value = val
+    styleDtlSheet.update_cells(cell_list)
+
+
+    #Batch Update results
+    cell_list = styleDtlSheet.range("M2:M"+ str(len(final_output)+1))
+    for xx, val2 in enumerate(final_output):
+        cell_list[xx].value = val2
+    styleDtlSheet.update_cells(cell_list) 
+
     #Batch Update
     poms = SamplePOMSheet.get_values("A2:U")
-    idss = styleDtlSheet.get_values("E2:E")
+    idss = styleDtlSheet.get_values("L2:M")
 
     print("start")
     for id in range(len(idss)):
         for ig in range(len(poms)):
             if(idss[id][0] == poms[ig][1]):
-                print("inside : ",poms[ig])
+                print( poms[ig][17]," ", idss[id][1])
+                poms[ig][17] = idss[id][1]
                 break
+    
+    r_output = []
 
+    for ik in range(len(poms)):
+        r_output.append(poms[ik][17])
 
+    cell_lstA = SamplePOMSheet.range("R2:R" + str(len(r_output)+1))
+    for ih, val3 in enumerate(r_output):
+       cell_lstA[ih].value = str(val3).strip("'")
+    SamplePOMSheet.update_cells(cell_lstA)
 
-
-    result = int(styleDtlSheet.cell(2,6).value)
-    total = int(styleDtlSheet.cell(2,3).value)
-    if result == total :
+    viewcnt = int(styleDtlSheet.cell(2,4).value)
+    if viewcnt == len(final_id) :
 
         showinfo(
             title='Information',
@@ -224,9 +299,9 @@ def clear_clicked():
     msg = f'You clear all data results!'
     # SamplePOMSheet.clear('R2:R', "")
     # sheet.values_clear("RAWDATA!R2:R10000")
-    sheet.values_clear("code!H2:H10000")
-    sheet.values_clear("code!L2:L10000")
-    sheet.values_clear("code!M2:M10000")
+    # sheet.values_clear("code!H2:H10000")
+    # sheet.values_clear("code!L2:L10000")
+    # sheet.values_clear("code!M2:M10000")
 
     showinfo(
         title='Information',
@@ -270,6 +345,7 @@ proceed_button.pack(fill='x', expand=False)
 # reset button
 clear_button = ttk.Button(window, text="Reset", command=clear_clicked)
 clear_button.pack(fill='x', expand=False)
+
 
 show_frame()  #Display 2
 window.mainloop()  #Starts GUI
