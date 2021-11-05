@@ -1,5 +1,7 @@
-from os import name, system
+from base64 import encodebytes
+from os import error, name, system
 import sys
+from tkinter import StringVar, messagebox
 from tkinter.constants import HORIZONTAL, LEFT, RIGHT
 from types import FrameType
 from matplotlib import pyplot as plt
@@ -18,6 +20,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 import time
 import sys, time
 import math
+import traceback
+
+from pyasn1.type.univ import Null
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
         "https://www.googleapis.com/auth/drive.file",
@@ -69,50 +74,51 @@ selected_sizes = tk.StringVar()
 #Lauch detection on style
 def proceed_clicked():
 
-    # camera frame on tkinter gui
-    global prevImg
-    _, frame = cap.read()
-    cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-    prevImg = Image.fromarray(cv2image)
-    ImageTk.PhotoImage(image=prevImg)
-    if (len(sys.argv) < 2):
-        filepath = "result.jpg"
-    else:
-        filepath = sys.argv[1]
-    #save captured frame as image
-    print ("Output file to: " + filepath)
-    prevImg.save(filepath)
+    try:
+        # camera frame on tkinter gui
+        global prevImg
+        _, frame = cap.read()
+        cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        prevImg = Image.fromarray(cv2image)
+        ImageTk.PhotoImage(image=prevImg)
+        if (len(sys.argv) < 2):
+            filepath = "result.jpg"
+        else:
+            filepath = sys.argv[1]
+        #save captured frame as image
+        print ("Output file to: " + filepath)
+        prevImg.save(filepath)
 
-    """ callback when the button clicked
-    """
-    # post tkinter gui text boxes into google sheet code tab
-    # msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}. Please wait for the result'
-    styleDtlSheet.update('B2', stylenum.get())
-    styleDtlSheet.update('B3', sizeset_entry.get())
-    styleDtlSheet.update('B4', view_entry.get())
-    #message box of gui details
-    # showinfo(
-    #     title='Information',
-    #     message=msg
-    # )
+        """ callback when the button clicked
+        """
+        # post tkinter gui text boxes into google sheet code tab
+        # msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}. Please wait for the result'
+        styleDtlSheet.update('B2', stylenum.get())
+        styleDtlSheet.update('B3', sizeset_entry.get())
+        styleDtlSheet.update('B4', view_entry.get())
+        #message box of gui details
+        # showinfo(
+        #     title='Information',
+        #     message=msg
+        # )
 
-    # get pomiDs selected from 1 style
-    pomIDs = styleDtlSheet.col_values(5)    
-    tps = int(styleDtlSheet.cell(2,4).value)
-    imageToBeInspected = '7M71906M.jpg'    #acting as camera
-    
-    #google sheet output on code as writer and store
-    final_output = []
-    final_id = []
-
-    #slice list into half
-    # pomID_1 = len(pomIDs)
-    # midpomID_2 = pomID_1//2
-    # template matching from style details and images
-    for i in pomIDs[1:]:
+        # get pomiDs selected from 1 style
+        pomIDs = styleDtlSheet.col_values(5)    
+        tps = int(styleDtlSheet.cell(2,4).value)
+        imageToBeInspected = '7M71906M.jpg'    #acting as camera
         
-        try:
+        #google sheet output on code as writer and store
+        final_output = []
+        final_id = []
+
+        #slice list into half
+        # pomID_1 = len(pomIDs)
+        # midpomID_2 = pomID_1//2
+        # template matching from style details and images
+        for i in pomIDs[1:]:
             
+            
+                
             cell_i = SamplePOMSheet.find(i)
             #cell2 = styleDtlSheet.find(poms)
 
@@ -126,7 +132,7 @@ def proceed_clicked():
 
             # print(pomOffset)
             pomIndex_i = 0
-    
+
             result_i = []
 
             img_i = cv.imread(imageToBeInspected,0)
@@ -158,7 +164,7 @@ def proceed_clicked():
             else:
                 top_left_i = max_loc
                 top_left_ii = max_loc2
-   
+
             #python subImages topleft 
             subImgpom_i = (top_left_i[0] + pomOffset[pomIndex_i][0], top_left_i[1] + pomOffset[pomIndex_i][1])
 
@@ -177,51 +183,52 @@ def proceed_clicked():
             cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
             cv.imwrite('Output\\'+str(pomUID_i)+'.jpg', img_i)
         
-           # pomIndex +=1
-        except NameError as e:
-            print(e)
+            # pomIndex +=1
     
-    #Clear Batch Update History
-    sheet.values_clear("code!L2:L10000")
-    sheet.values_clear("code!M2:M10000")            
+        #Clear Batch Update History
+        sheet.values_clear("code!L2:L10000")
+        sheet.values_clear("code!M2:M10000")            
 
-    #Batch Update IDs
-    cell_list = styleDtlSheet.range("L2:L"+ str(len(final_id)+1))
-    for xx, val in enumerate(final_id):
-        cell_list[xx].value = val
-    styleDtlSheet.update_cells(cell_list)
+        #Batch Update IDs
+        cell_list = styleDtlSheet.range("L2:L"+ str(len(final_id)+1))
+        for xx, val in enumerate(final_id):
+            cell_list[xx].value = val
+        styleDtlSheet.update_cells(cell_list)
 
 
-    #Batch Update results
-    cell_list = styleDtlSheet.range("M2:M"+ str(len(final_output)+1))
-    for xx, val2 in enumerate(final_output):
-        cell_list[xx].value = val2
-    styleDtlSheet.update_cells(cell_list) 
+        #Batch Update results
+        cell_list = styleDtlSheet.range("M2:M"+ str(len(final_output)+1))
+        for xx, val2 in enumerate(final_output):
+            cell_list[xx].value = val2
+        styleDtlSheet.update_cells(cell_list) 
 
-    #Batch Update
-    poms = SamplePOMSheet.get_values("A2:U")
-    idss = styleDtlSheet.get_values("L2:M")
+        #Batch Update
+        poms = SamplePOMSheet.get_values("A2:U")
+        idss = styleDtlSheet.get_values("L2:M")
 
-    print("start")
-    for id in range(len(idss)):
-        for ig in range(len(poms)):
-            if(idss[id][0] == poms[ig][1]):
-                print( poms[ig][17]," ", idss[id][1])
-                poms[ig][17] = idss[id][1]
-                break
-    
-    r_output = []
+        print("start")
+        for id in range(len(idss)):
+            for ig in range(len(poms)):
+                if(idss[id][0] == poms[ig][1]):
+                    print( poms[ig][17]," ", idss[id][1])
+                    poms[ig][17] = idss[id][1]
+                    break
+        
+        r_output = []
 
-    for ik in range(len(poms)):
-        r_output.append(poms[ik][17])
+        for ik in range(len(poms)):
+            r_output.append(poms[ik][17])
 
-    cell_lstA = SamplePOMSheet.range("R2:R" + str(len(r_output)+1))
-    for ih, val3 in enumerate(r_output):
-       cell_lstA[ih].value = str(val3).strip("'")
-    SamplePOMSheet.update_cells(cell_lstA)
-    showinfo(
-            title='Information',
-            message="Detection Done! Please detect other poms to complete your data.")
+        cell_lstA = SamplePOMSheet.range("R2:R" + str(len(r_output)+1))
+        for ih, val3 in enumerate(r_output):
+            cell_lstA[ih].value = str(val3).strip("'")
+        SamplePOMSheet.update_cells(cell_lstA)
+        showinfo(
+                title='Information',
+                message="Detection Done! Please detect other poms to complete your data.")
+    except AttributeError or KeyError or TabError or NameError or TypeError or IndexError or ValueError or BufferError or EOFError or ImportError or TimeoutError as e:
+       messagebox.showerror('Error',e)
+# Show error in messagebox
 
 
 def clear_clicked():
