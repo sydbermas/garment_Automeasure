@@ -54,12 +54,9 @@ cap = cv.VideoCapture(int(capg),cv.CAP_DSHOW)
 #Camera frame
 def show_frame():
     _, frame = cap.read()
-    # frame = cv.flip(frame, 1)
-    # cv.rectangle(frame, (80, 0), (560, 479), (0, 255, 0), 1, 0)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
-    
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
     lmain.after(10, show_frame) 
@@ -94,16 +91,10 @@ def proceed_clicked():
         """ callback when the button clicked
         """
         # post tkinter gui text boxes into google sheet code tab
-        # msg = f'You entered stylenum: {stylenum.get()}, stylenum: {sizeset_entry.get()}, and view: {view_entry.get()}. Please wait for the result'
         styleDtlSheet.update('B2', stylenum.get())
         styleDtlSheet.update('B3', sizeset_entry.get())
         styleDtlSheet.update('B4', view_entry.get())
-        #message box of gui details
-        # showinfo(
-        #     title='Information',
-        #     message=msg
-        # )
-
+       
         # get pomiDs selected from 1 style
         pomIDs = []
         pomIDlst = (styleDtlSheet.col_values(5))
@@ -112,7 +103,6 @@ def proceed_clicked():
         pxltoinch = styleDtlSheet.cell(2,9).value
         pixeltoInch = pxltoinch
         
-        
         #google sheet output on code as writer and store
         final_output = []
         final_id = []
@@ -120,43 +110,33 @@ def proceed_clicked():
         # template matching from style details and images
         for i in pomIDs[1:]:
             
-            cell_i = SamplePOMSheet.find(i)
-            #cell2 = styleDtlSheet.find(poms)
-
-            pomID_i = (cell_i.row)
-
-            pomOffset = [[0,0,0,0]]  
-            pomUID_i = SamplePOMSheet.cell(pomID_i,2).value
-            styleName_i = SamplePOMSheet.cell(pomID_i,3).value
-            output_i = 'C:\subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'
-            output_ii = 'C:\subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'
-
-            # print(pomOffset)
-            pomIndex_i = 0
-
-            result_i = []
-
-            img_i = cv.imread(imageToBeInspected,0)
-            
-            img2_i = img_i.copy()
-            
-            templ_i = cv.imread(output_i,0) 
-            templ_ii = cv.imread(output_ii,0)
-            w, h = templ_i.shape[::-1]
-            w2, h2 = templ_ii.shape[::-1]
+            cell_i = SamplePOMSheet.find(i) #pomID
+            pomID_i = (cell_i.row)  #pomdID location cell
+            pomOffset = [[0,0,0,0]]  #subImages x,y values
+            pomUID_i = SamplePOMSheet.cell(pomID_i,2).value #pomIDUnique
+            styleName_i = SamplePOMSheet.cell(pomID_i,3).value  #stylenum
+            output_i = 'C:\subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'    #subImg1
+            output_ii = 'C:\subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'   #subImg2
+            pomIndex_i = 0  #x,y offset indexes
+            result_i = []   #pom measure output list storage
+            img_i = cv.imread(imageToBeInspected,0) #image inspection read
+            img2_i = img_i.copy()   #image copy
+            templ_i = cv.imread(output_i,0)     #subImg1 read
+            templ_ii = cv.imread(output_ii,0)   #subImg2 read
+            w, h = templ_i.shape[::-1]  #subImg1 shape height and width np arrays
+            w2, h2 = templ_ii.shape[::-1]   #subImg2 shape height and width np arrays
             # All the 6 methods for comparison in a list
             methods_i = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
                     'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
-            meth_i = methods_i[1] # Mehtod setting
-            img_i = img2_i.copy()
-            method_i = eval(meth_i)
+            meth_i = methods_i[1] # Method selection
+            img_i = img2_i.copy()   #image copy return
+            method_i = eval(meth_i) #method eval for images 
             # Apply template Matchingpip i
-            res_i = cv.matchTemplate(img_i,templ_i,method_i)
-            res2_i = cv.matchTemplate(img_i,templ_ii,method_i)
-            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res_i)
-            min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2_i)
+            res_i = cv.matchTemplate(img_i,templ_i,method_i)    #result values1 from match template
+            res2_i = cv.matchTemplate(img_i,templ_ii,method_i)  #result values2 from match template
+            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res_i)    #get 4 specific types of values after getting result
+            min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(res2_i)   #get 4 specific types of values after getting result
             
-            # print(min_loc, max_loc, min_loc2, max_loc2)
             # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
             if method_i in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
                 top_left_i = min_loc
@@ -166,27 +146,22 @@ def proceed_clicked():
                 top_left_i = max_loc
                 top_left_ii = max_loc2
 
-            #python subImages topleft 
+            #python subImages topleft location image 1 and 2 on inspected image
             subImgpom_i = (top_left_i[0] + pomOffset[pomIndex_i][0], top_left_i[1] + pomOffset[pomIndex_i][1])
-
             subImgpom_ii = (top_left_ii[0] + pomOffset[pomIndex_i][2], top_left_ii[1] + pomOffset[pomIndex_i][3])
 
             #result calculation from distances of 2 subImages according from height of camera
             result_i.append((math.sqrt((top_left_ii[0] - top_left_i[0])**2 + (top_left_ii[1] -top_left_i[1])**2))/float(pixeltoInch))
-            
-            print(pomUID_i+":",round(result_i[pomIndex_i],2),"inches") # pom end
-                #SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
-            #push to finalOutput
+            print(pomUID_i+":",round(result_i[pomIndex_i],2),"inches") # print results every pom
+            #push to temp sheet (code) pomName:pomResult
             final_id.append(pomUID_i)
             final_output.append(round(result_i[pomIndex_i],2))
-
+            #image output line and text result draw
             cv.line(img_i,subImgpom_i, subImgpom_ii, 255, 1)    
             cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
-            cv.imwrite('Output\\'+str(pomUID_i)+'.jpg', img_i)
-        
-            # pomIndex +=1
+            cv.imwrite('C:\Output\\'+str(pomUID_i)+'.jpg', img_i)
     
-        #Clear Batch Update History
+        #Clear temp sheet (code) pomName:pomResult
         sheet.values_clear("code!L2:L10000")
         sheet.values_clear("code!M2:M10000")            
 
@@ -203,10 +178,11 @@ def proceed_clicked():
             cell_list[xx].value = val2
         styleDtlSheet.update_cells(cell_list) 
 
-        #Batch Update
+        #Batch Update Final
         poms = SamplePOMSheet.get_values("A2:U")
         idss = styleDtlSheet.get_values("L2:M")
 
+        #merging temp values to rawdata outputs cell
         print("start")
         for id in range(len(idss)):
             for ig in range(len(poms)):
@@ -214,9 +190,7 @@ def proceed_clicked():
                     print( poms[ig][17]," ", idss[id][1])
                     poms[ig][17] = idss[id][1]
                     break
-        
         r_output = []
-
         for ik in range(len(poms)):
             r_output.append(poms[ik][17])
 
@@ -224,14 +198,15 @@ def proceed_clicked():
         for ih, val3 in enumerate(r_output):
             cell_lstA[ih].value = str(val3).strip("'")
         SamplePOMSheet.update_cells(cell_lstA)
+        print("finished")
+        #Tkinter Message Box showing detection finished
         showinfo(
                 title='Information',
                 message="Detection Done! Please detect other poms to complete your data.")
     except AttributeError or KeyError or TabError or NameError or TypeError or IndexError or ValueError or BufferError or EOFError or ImportError or TimeoutError as e:
        messagebox.showerror('Error',e)
-# Show error in messagebox
 
-
+# Button Reset on required fields
 def clear_clicked():
     
     """ callback when the button clicked
@@ -239,15 +214,10 @@ def clear_clicked():
     msg = f'You clear all field results!'
     sheet.values_clear("code!L2:L10000")
     sheet.values_clear("code!M2:M10000")
-
-    showinfo(
-        title='Information',
-        message=msg
-    )
+    showinfo(title='Information',message=msg)
     stylenum.set("")
     selected_sizes.set("")
     selected_view.set("")
-    # text.set("")
 
 # stylenums
 stylenum_label = ttk.Label(window, text="Style Number:")
