@@ -171,7 +171,6 @@ def proceed_clicked():
             cell_list[xx].value = val
         styleDtlSheet.update_cells(cell_list)
 
-
         #Batch Update results
         cell_list = styleDtlSheet.range("M2:M"+ str(len(final_output)+1))
         for xx, val2 in enumerate(final_output):
