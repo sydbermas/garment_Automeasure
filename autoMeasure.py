@@ -47,13 +47,15 @@ imageFrame.pack(side=LEFT, expand=False)
 #Capture video frames
 lmain = tk.Label(imageFrame)
 lmain.pack(side=LEFT, expand=False) 
-cap = cv.VideoCapture(int(styleDtlSheet.cell(2,7).value),cv.CAP_DSHOW)
+capnum = styleDtlSheet.cell(2,7).value
+capg = capnum
+cap = cv.VideoCapture(int(capg),cv.CAP_DSHOW)
 
 #Camera frame
 def show_frame():
     _, frame = cap.read()
     # frame = cv.flip(frame, 1)
-    cv.rectangle(frame, (80, 0), (560, 479), (0, 255, 0), 1, 0)
+    # cv.rectangle(frame, (80, 0), (560, 479), (0, 255, 0), 1, 0)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
@@ -103,22 +105,21 @@ def proceed_clicked():
         # )
 
         # get pomiDs selected from 1 style
-        pomIDs = styleDtlSheet.col_values(5)    
-        tps = int(styleDtlSheet.cell(2,4).value)
-        imageToBeInspected = '7M71906M.jpg'    #acting as camera
+        pomIDs = []
+        pomIDlst = (styleDtlSheet.col_values(5))
+        pomIDs.extend(pomIDlst)
+        imageToBeInspected = 'result.jpg'
+        pxltoinch = styleDtlSheet.cell(2,9).value
+        pixeltoInch = pxltoinch
+        
         
         #google sheet output on code as writer and store
         final_output = []
         final_id = []
 
-        #slice list into half
-        # pomID_1 = len(pomIDs)
-        # midpomID_2 = pomID_1//2
         # template matching from style details and images
         for i in pomIDs[1:]:
             
-            
-                
             cell_i = SamplePOMSheet.find(i)
             #cell2 = styleDtlSheet.find(poms)
 
@@ -127,8 +128,8 @@ def proceed_clicked():
             pomOffset = [[0,0,0,0]]  
             pomUID_i = SamplePOMSheet.cell(pomID_i,2).value
             styleName_i = SamplePOMSheet.cell(pomID_i,3).value
-            output_i = 'subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'
-            output_ii = 'subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'
+            output_i = 'C:\subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'
+            output_ii = 'C:\subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'
 
             # print(pomOffset)
             pomIndex_i = 0
@@ -171,7 +172,7 @@ def proceed_clicked():
             subImgpom_ii = (top_left_ii[0] + pomOffset[pomIndex_i][2], top_left_ii[1] + pomOffset[pomIndex_i][3])
 
             #result calculation from distances of 2 subImages according from height of camera
-            result_i.append((math.sqrt((top_left_ii[0] - top_left_i[0])**2 + (top_left_ii[1] -top_left_i[1])**2))/14.9)
+            result_i.append((math.sqrt((top_left_ii[0] - top_left_i[0])**2 + (top_left_ii[1] -top_left_i[1])**2))/float(pixeltoInch))
             
             print(pomUID_i+":",round(result_i[pomIndex_i],2),"inches") # pom end
                 #SamplePOMSheet.update_cell(pomID1, 18 , (round(resultD[pomIndex],2)))
