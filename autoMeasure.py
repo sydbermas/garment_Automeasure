@@ -53,6 +53,7 @@ cap = cv.VideoCapture(int(capg),cv.CAP_DSHOW)
 
 #Camera frame
 def show_frame():
+
     _, frame = cap.read()
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
@@ -69,7 +70,7 @@ views = ('Front', 'Back', 'Other')
 selected_view = tk.StringVar()
 sizes = ('XS', 'S', 'M','L', 'XL', 'XXL')
 selected_sizes = tk.StringVar()
-
+buttonClicked = False
 #Lauch detection on style
 def proceed_clicked():
 
@@ -107,16 +108,17 @@ def proceed_clicked():
         final_output = []
         final_id = []
 
+
+        pomOffset = [[0,0,0,0]]  #subImages x,y values
         # template matching from style details and images
         for i in pomIDs[1:]:
-            
-            cell_i = SamplePOMSheet.find(i) #pomID
-            pomID_i = (cell_i.row)  #pomdID location cell
-            pomOffset = [[0,0,0,0]]  #subImages x,y values
-            pomUID_i = SamplePOMSheet.cell(pomID_i,2).value #pomIDUnique
-            styleName_i = SamplePOMSheet.cell(pomID_i,3).value  #stylenum
-            output_i = 'C:\subImages\\'+styleName_i+'\subImg1\\'+pomUID_i+'.JPG'    #subImg1
-            output_ii = 'C:\subImages\\'+styleName_i+'\subImg2\\'+pomUID_i+'.JPG'   #subImg2
+            # time.sleep(1)
+            # cell_i = SamplePOMSheet.find(i) #pomID
+            # pomID_i = (cell_i.row)  #pomdID location cell
+            # pomUID_i = SamplePOMSheet.cell(pomID_i,2).value #pomIDUnique
+            # styleName_i = SamplePOMSheet.cell(pomID_i,3).value  #stylenum
+            output_i = 'C:\subImages\\'+stylenum.get()+'\subImg1\\'+str(i)+'.JPG'    #subImg1
+            output_ii = 'C:\subImages\\'+stylenum.get()+'\subImg2\\'+str(i)+'.JPG'   #subImg2
             pomIndex_i = 0  #x,y offset indexes
             result_i = []   #pom measure output list storage
             img_i = cv.imread(imageToBeInspected,0) #image inspection read
@@ -152,15 +154,19 @@ def proceed_clicked():
 
             #result calculation from distances of 2 subImages according from height of camera
             result_i.append((math.sqrt((top_left_ii[0] - top_left_i[0])**2 + (top_left_ii[1] -top_left_i[1])**2))/float(pixeltoInch))
-            print(pomUID_i+":",round(result_i[pomIndex_i],2),"inches") # print results every pom
+            print(str(i)+":",round(result_i[pomIndex_i],2),"inches") # print results every pom
             #push to temp sheet (code) pomName:pomResult
-            final_id.append(pomUID_i)
+            final_id.append(i)
             final_output.append(round(result_i[pomIndex_i],2))
             #image output line and text result draw
-            cv.line(img_i,subImgpom_i, subImgpom_ii, 255, 1)    
-            cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, 255, 1)
-            cv.imwrite('C:\Output\\'+str(pomUID_i)+'.jpg', img_i)
-    
+            img_i = cv.cvtColor(frame, cv.COLOR_RGBA2BGR)
+            cv.line(img_i,subImgpom_i, subImgpom_ii, (34,139,34), 2)    
+            cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (34,139,34), 1)
+            cv.imwrite('C:\Output\\'+str(i)+'.jpg', img_i)#rgb(0,128,0)   #rgb(34,139,34)
+            cv.imshow('ImgOutput',img_i)
+            cv.waitKey(1)
+        cv.destroyWindow('ImgOutput')
+        # time.sleep(3)
         #Clear temp sheet (code) pomName:pomResult
         sheet.values_clear("code!L2:L10000")
         sheet.values_clear("code!M2:M10000")            
@@ -170,7 +176,7 @@ def proceed_clicked():
         for xx, val in enumerate(final_id):
             cell_list[xx].value = val
         styleDtlSheet.update_cells(cell_list)
-
+        time.sleep(1)
         #Batch Update results
         cell_list = styleDtlSheet.range("M2:M"+ str(len(final_output)+1))
         for xx, val2 in enumerate(final_output):
@@ -195,7 +201,7 @@ def proceed_clicked():
 
         cell_lstA = SamplePOMSheet.range("R2:R" + str(len(r_output)+1))
         for ih, val3 in enumerate(r_output):
-            cell_lstA[ih].value = str(val3).strip("'")
+            cell_lstA[ih].value = str(val3).strip("'").strip('"')
         SamplePOMSheet.update_cells(cell_lstA)
         print("finished")
         #Tkinter Message Box showing detection finished
@@ -204,6 +210,7 @@ def proceed_clicked():
                 message="Detection Done! Please detect other poms to complete your data.")
     except AttributeError or KeyError or TabError or NameError or TypeError or IndexError or ValueError or BufferError or EOFError or ImportError or TimeoutError as e:
        messagebox.showerror('Error',e)
+       
 
 # Button Reset on required fields
 def clear_clicked():
