@@ -111,11 +111,7 @@ def proceed_clicked():
         pomOffset = [[0,0,0,0]]  #subImages x,y values
         # template matching from style details and images
         for i in pomIDs[1:]:
-            # time.sleep(1)
-            # cell_i = SamplePOMSheet.find(i) #pomID
-            # pomID_i = (cell_i.row)  #pomdID location cell
-            # pomUID_i = SamplePOMSheet.cell(pomID_i,2).value #pomIDUnique
-            # styleName_i = SamplePOMSheet.cell(pomID_i,3).value  #stylenum
+
             output_i = 'C:\subImages\\'+stylenum.get()+'\subImg1\\'+str(i)+'.JPG'    #subImg1
             output_ii = 'C:\subImages\\'+stylenum.get()+'\subImg2\\'+str(i)+'.JPG'   #subImg2
             pomIndex_i = 0  #x,y offset indexes
@@ -165,7 +161,6 @@ def proceed_clicked():
             cv.imshow('ImgOutput',imgout)
             cv.waitKey(1)
         cv.destroyWindow('ImgOutput')
-        # time.sleep(3)
         #Clear temp sheet (code) pomName:pomResult
         sheet.values_clear("code!L2:L10000")
         sheet.values_clear("code!M2:M10000")            
@@ -210,7 +205,6 @@ def proceed_clicked():
     except AttributeError or KeyError or TabError or NameError or TypeError or IndexError or ValueError or BufferError or EOFError or ImportError or TimeoutError as e:
        messagebox.showerror('Error',e)
        
-
 # Button Reset on required fields
 def clear_clicked():
     
