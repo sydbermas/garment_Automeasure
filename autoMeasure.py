@@ -100,14 +100,13 @@ def proceed_clicked():
         pomIDs = []
         pomIDlst = (styleDtlSheet.col_values(5))
         pomIDs.extend(pomIDlst)
-        imageToBeInspected = '7M71906XL0.jpg'
+        imageToBeInspected = '7M71906M.jpg'
         pxltoinch = styleDtlSheet.cell(2,9).value
         pixeltoInch = pxltoinch
         
         #google sheet output on code as writer and store
         final_output = []
         final_id = []
-
 
         pomOffset = [[0,0,0,0]]  #subImages x,y values
         # template matching from style details and images
@@ -160,8 +159,8 @@ def proceed_clicked():
             final_output.append(round(result_i[pomIndex_i],2))
             #image output line and text result draw
             imgout = cv.imread(imageToBeInspected)
-            cv.line(imgout,subImgpom_i, subImgpom_ii, (34,139,34), 2)    
-            cv.putText(imgout, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (34,139,34), 1)
+            cv.line(imgout,subImgpom_i, subImgpom_ii, (253, 249, 21), 3)    
+            cv.putText(imgout, str(round(result_i[pomIndex_i],2)), (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 1.5, (51, 255, 255), 2)
             cv.imwrite('C:\Output\\'+str(i)+'.jpg', imgout)#rgb(0,128,0)   #rgb(34,139,34)
             cv.imshow('ImgOutput',imgout)
             cv.waitKey(1)
