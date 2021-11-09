@@ -100,7 +100,7 @@ def proceed_clicked():
         pomIDs = []
         pomIDlst = (styleDtlSheet.col_values(5))
         pomIDs.extend(pomIDlst)
-        imageToBeInspected = 'result.jpg'
+        imageToBeInspected = '7M71906XL0.jpg'
         pxltoinch = styleDtlSheet.cell(2,9).value
         pixeltoInch = pxltoinch
         
@@ -159,11 +159,11 @@ def proceed_clicked():
             final_id.append(i)
             final_output.append(round(result_i[pomIndex_i],2))
             #image output line and text result draw
-            img_i = cv.cvtColor(frame, cv.COLOR_RGBA2BGR)
-            cv.line(img_i,subImgpom_i, subImgpom_ii, (34,139,34), 2)    
-            cv.putText(img_i, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (34,139,34), 1)
-            cv.imwrite('C:\Output\\'+str(i)+'.jpg', img_i)#rgb(0,128,0)   #rgb(34,139,34)
-            cv.imshow('ImgOutput',img_i)
+            imgout = cv.imread(imageToBeInspected)
+            cv.line(imgout,subImgpom_i, subImgpom_ii, (34,139,34), 2)    
+            cv.putText(imgout, str(round(result_i[pomIndex_i],2)) , (np.add(subImgpom_ii,[0,0])), cv.FONT_HERSHEY_SIMPLEX, 0.4, (34,139,34), 1)
+            cv.imwrite('C:\Output\\'+str(i)+'.jpg', imgout)#rgb(0,128,0)   #rgb(34,139,34)
+            cv.imshow('ImgOutput',imgout)
             cv.waitKey(1)
         cv.destroyWindow('ImgOutput')
         # time.sleep(3)
