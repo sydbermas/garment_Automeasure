@@ -269,5 +269,40 @@ proceed_button.pack(fill='x', expand=False)
 clear_button = ttk.Button(window, text="Reset", command=clear_clicked)
 clear_button.pack(fill='x', expand=False)
 
+chiefs = []
+uniq_styles = (styleDtlSheet.col_values(1))
+del uniq_styles[0]
+chiefs.extend(uniq_styles)
+
+def match_string():
+    hits = []
+    got = stylenum.get()
+    for item in chiefs:
+        if item.startswith(got):
+            hits.append(item)
+    return hits    
+
+def get_typed(event):
+    if len(event.keysym) == 1:
+        hits = match_string()
+        show_hit(hits)
+
+def show_hit(lst):
+    if len(lst) == 1:
+        stylenum.set(lst[0])
+        detect_pressed.filled = True
+
+def detect_pressed(event):    
+    key = event.keysym
+    if len(key) == 1 and detect_pressed.filled is True:
+        pos = stylenum_entry.index(tk.INSERT)
+        stylenum_entry.delete(pos, tk.END)
+
+detect_pressed.filled = False
+
+stylenum_entry.focus_set()
+stylenum_entry.bind('<KeyRelease>', get_typed)
+stylenum_entry.bind('<Key>', detect_pressed)
+
 show_frame()  #Display 2
 window.mainloop()  #Starts GUI
