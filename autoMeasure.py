@@ -48,12 +48,28 @@ imageFrame.pack(side=LEFT, expand=False)
 lmain = tk.Label(imageFrame)
 lmain.pack(side=LEFT, expand=False) 
 capnum = styleDtlSheet.cell(2,7).value
+capr = styleDtlSheet.cell(4,7).value
 capg = capnum
+camr = capr
 cap = cv.VideoCapture(int(capg),cv.CAP_DSHOW)
+
+ #change camera resolutions
+if camr == "1920x1080":
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
+if camr == "1080x720":
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, 1080)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+if camr == "800x600":
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, 800)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 600)
+if camr == "640x480":
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
 
 #Camera frame
 def show_frame():
-
+   
     _, frame = cap.read()
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
@@ -217,6 +233,7 @@ def clear_clicked():
     stylenum.set("")
     selected_sizes.set("")
     selected_view.set("")
+
 
 # stylenums
 stylenum_label = ttk.Label(window, text="Style Number:")
