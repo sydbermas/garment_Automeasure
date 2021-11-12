@@ -21,7 +21,6 @@ import time
 import sys, time
 import math
 import traceback
-
 from pyasn1.type.univ import Null
 scope = ["https://spreadsheets.google.com/feeds",
         'https://www.googleapis.com/auth/spreadsheets',
